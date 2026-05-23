@@ -1,5 +1,5 @@
-const { useState, useEffect } = React;
-/* YT_URL and CHANNELS are declared in sections.jsx (loaded first) and shared
+const { useState, useEffect, useRef } = React;
+/* KICK_USER and CHANNELS are declared in sections.jsx (loaded first) and shared
    via global script scope — do not redeclare them here. */
 
 function hexToRgba(hex,a){ const h=hex.replace('#',''); const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
@@ -39,11 +39,13 @@ function App(){
     <LangContext.Provider value={{lang:tw.lang,t}}>
       <Nav isLive={isLive} lang={tw.lang} setLang={v=>set('lang',v)} onCustomize={()=>setPanel(o=>!o)}/>
       <Hero isLive={isLive}/>
+      <OnDuty/>
       <Channels/>
       <About/>
       <Community/>
       <Footer/>
       <TweaksPanel tw={tw} set={set} open={panel} onClose={()=>setPanel(false)}/>
+      <KickPreview/>
     </LangContext.Provider>
   );
 }
@@ -65,8 +67,8 @@ function Nav({ isLive, lang, setLang, onCustomize }){
           <a href="#community" onMouseEnter={()=>window.__hover?.()}>{t.navCommunity}</a>
         </div>
         <div className="nav__right">
-          <a className="livepill" data-live={isLive} href={YT_URL} target="_blank" rel="noopener noreferrer"
-             onMouseEnter={()=>window.__hover?.()}>
+          <a className="livepill" data-live={isLive} href={`https://kick.com/${KICK_USER}`} target="_blank" rel="noopener noreferrer"
+             data-kpv onMouseEnter={()=>window.__hover?.()}>
             <span className="dot"></span><span>{isLive?t.live:t.watchLive}</span>
           </a>
           <div className="langtog" data-l={lang}>
@@ -79,6 +81,61 @@ function Nav({ isLive, lang, setLang, onCustomize }){
         </div>
       </div>
     </nav>
+  );
+}
+
+/* Kick hover-preview: hovering any [data-kpv] pops an embedded mini-player (desktop). */
+function KickPreview(){
+  const [show,setShow]=useState(false);
+  const [mount,setMount]=useState(false);
+  const [pos,setPos]=useState({top:0,left:0});
+  const [muted,setMuted]=useState(true);
+  const [vol,setVol]=useState(0.7);
+  const hide=useRef(null);
+
+  useEffect(()=>{
+    if(window.innerWidth<900) return;
+    const W=480,H=270,G=14;
+    const open=(el)=>{
+      clearTimeout(hide.current);
+      const r=el.getBoundingClientRect();
+      let top=r.bottom+G; if(top+H>innerHeight-20) top=Math.max(20,r.top-H-G);
+      let left=r.left+r.width/2-W/2; left=Math.max(16,Math.min(left,innerWidth-W-16));
+      setPos({top,left}); setMount(true); setShow(true);
+    };
+    const sched=()=>{ clearTimeout(hide.current); hide.current=setTimeout(()=>setShow(false),200); };
+    const over=(e)=>{ const tg=e.target.closest('[data-kpv]'); if(tg){open(tg);return;} if(e.target.closest('.kpv')) clearTimeout(hide.current); };
+    const out=(e)=>{ const tg=e.target.closest('[data-kpv]'); if(!tg)return; const g=e.relatedTarget; if(g&&(g.closest?.('[data-kpv]')||g.closest?.('.kpv')))return; sched(); };
+    const pout=(e)=>{ if(!e.target.closest('.kpv'))return; const g=e.relatedTarget; if(g&&(g.closest?.('[data-kpv]')||g.closest?.('.kpv')))return; sched(); };
+    document.addEventListener('mouseover',over);
+    document.addEventListener('mouseout',out);
+    document.addEventListener('mouseout',pout);
+    return ()=>{ document.removeEventListener('mouseover',over); document.removeEventListener('mouseout',out); document.removeEventListener('mouseout',pout); clearTimeout(hide.current); };
+  },[]);
+
+  return (
+    <div className={`kpv ${show?'show':''}`} style={{top:pos.top,left:pos.left}} aria-hidden={!show}>
+      <div className="kpv__v">
+        {mount && <iframe key={`k-${muted?'m':'u'}-${Math.round(vol*10)}`}
+          src={`https://player.kick.com/${KICK_USER}?autoplay=true&muted=${muted}&volume=${vol}`}
+          title="ABU ADAMZ live on Kick" allow="autoplay; fullscreen; picture-in-picture" loading="lazy"/>}
+      </div>
+      <div className="kpv__ft">
+        <span className="kpv__dot"></span><span>KICK.COM/{KICK_USER.toUpperCase()}</span>
+        <span className="kpv__au">
+          <button className="kpv__mute" onClick={(e)=>{e.preventDefault();e.stopPropagation();setMuted(m=>!m);}} aria-label={muted?'Unmute':'Mute'}>
+            {muted?(
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            ):(
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            )}
+          </button>
+          <input className="kpv__vol" type="range" min="0" max="1" step="0.05" value={muted?0:vol}
+            onChange={(e)=>{const v=parseFloat(e.target.value);setVol(v);setMuted(v===0);}}
+            onClick={(e)=>e.stopPropagation()} aria-label="Volume"/>
+        </span>
+      </div>
+    </div>
   );
 }
 

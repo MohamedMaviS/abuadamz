@@ -1,13 +1,14 @@
 const { useContext } = React;
 
-const YT_URL = 'https://www.youtube.com/@ABU_ADAMZ';
+const KICK_USER = 'abu_adamz';
 const CHANNELS = [
-  { key:'youtube',   name:'YOUTUBE',   handle:'@ABU_ADAMZ',           url:'https://www.youtube.com/@ABU_ADAMZ',                          color:'#ff2d3f', icon:'YouTube' },
-  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@ABUADAMZ',                            color:'#25f4ee', icon:'TikTok' },
-  { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e1306c', icon:'Instagram' },
-  { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#e7e7ea', icon:'X' },
-  { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#5865f2', icon:'Discord' },
-  { key:'whatsapp',  name:'WHATSAPP',  handle:'Official channel',     url:'https://www.whatsapp.com/channel/0029Vb6dID43AzNXS9Dx4X06',   color:'#25d366', icon:'WhatsApp' },
+  { key:'kick',      name:'KICK',      handle:'kick.com/abu_adamz',   url:'https://kick.com/abu_adamz',                                  color:'#f5c451', icon:'Kick' },
+  { key:'youtube',   name:'YOUTUBE',   handle:'@ABU_ADAMZ',           url:'https://www.youtube.com/@ABU_ADAMZ',                          color:'#e9b949', icon:'YouTube' },
+  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@ABUADAMZ',                            color:'#ffd86b', icon:'TikTok' },
+  { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e0b24a', icon:'Instagram' },
+  { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#f0e0b0', icon:'X' },
+  { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#d9a441', icon:'Discord' },
+  { key:'whatsapp',  name:'WHATSAPP',  handle:'Official channel',     url:'https://www.whatsapp.com/channel/0029Vb6dID43AzNXS9Dx4X06',   color:'#c8912b', icon:'WhatsApp' },
 ];
 
 const LOGO_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
@@ -21,10 +22,11 @@ function Logo({ className, lazy }) {
       else if(s.src.indexOf('data:')!==0) s.src=LOGO_FALLBACK; }} />;
 }
 
-function SecHead({ tag, children }) {
+function SecHead({ tag, icon, children }) {
+  const IC = Icon[icon] || Icon.Star;
   return (
     <div className="sec__head">
-      <div className="tag rv"><span className="tag__star"><Icon.Star/></span>{tag}</div>
+      <div className="tag rv"><span className="tag__star"><IC/></span>{tag}</div>
       <h2 className="h-sec rv" style={{transitionDelay:'.08s'}}>{children}</h2>
     </div>
   );
@@ -33,6 +35,7 @@ function SecHead({ tag, children }) {
 /* ---------------- HERO ---------------- */
 function Hero({ isLive }) {
   const { t } = useContext(LangContext);
+  const KICK = `https://kick.com/${KICK_USER}`;
   return (
     <header className="hero">
       <div className="app-pad hero__in">
@@ -47,8 +50,8 @@ function Hero({ isLive }) {
             <span className="crest__cn crest__cn--bl" aria-hidden="true"></span>
             <span className="crest__cn crest__cn--br" aria-hidden="true"></span>
           </div>
-          <a className="crest__live" data-live={isLive} href={YT_URL} target="_blank" rel="noopener noreferrer"
-             onMouseEnter={()=>window.__hover?.()}>
+          <a className="crest__live" data-live={isLive} href={KICK} target="_blank" rel="noopener noreferrer"
+             data-kpv onMouseEnter={()=>window.__hover?.()}>
             <span className="dot"></span><span>{isLive ? t.live : t.offline}</span>
           </a>
         </div>
@@ -59,9 +62,9 @@ function Hero({ isLive }) {
           <div className="hero__sub rv" style={{transitionDelay:'.12s'}}>{t.heroSub}</div>
           <p className="lead hero__lead rv" style={{transitionDelay:'.18s'}}>{t.heroTagline}</p>
           <div className="hero__cta rv" style={{transitionDelay:'.24s'}}>
-            <a className="btn btn-primary" href={YT_URL} target="_blank" rel="noopener noreferrer"
-               onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
-              <Icon.Play/><span>{t.heroWatch}</span>
+            <a className="btn btn-primary" href={KICK} target="_blank" rel="noopener noreferrer"
+               data-kpv onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
+              <Icon.Kick/><span>{t.heroWatch}</span>
             </a>
             <a className="btn btn-ghost" href="#channels" onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
               <Icon.Arrow/><span>{t.heroChannels}</span>
@@ -69,7 +72,7 @@ function Hero({ isLive }) {
           </div>
         </div>
       </div>
-      <a className="scrollcue" href="#channels" aria-label={t.scroll}
+      <a className="scrollcue" href="#duty" aria-label={t.scroll}
          onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
         <span className="scrollcue__lab">{t.scroll}</span>
         <span className="scrollcue__mouse"><i></i></span>
@@ -79,22 +82,45 @@ function Hero({ isLive }) {
   );
 }
 
+/* ---------------- ON DUTY (cinematic city band) ---------------- */
+function OnDuty() {
+  const { t } = useContext(LangContext);
+  return (
+    <section className="sec duty" id="duty">
+      <div className="app-pad">
+        <SecHead tag={t.dutyTag} icon="Shield">{t.dutyTitle}</SecHead>
+        <div className="duty__frame rv rv-s" data-tilt="4">
+          <img src="assets/city.webp" alt={t.dutyCaption} loading="lazy" decoding="async"
+               onError={(e)=>{ const s=e.currentTarget; if(/\.webp$/.test(s.src)) s.src='assets/city.jpg'; }}/>
+          <span className="duty__grad" aria-hidden="true"></span>
+          <span className="duty__cn duty__cn--tl" aria-hidden="true"></span>
+          <span className="duty__cn duty__cn--br" aria-hidden="true"></span>
+          <div className="duty__cap"><span className="duty__badge"><Icon.Star/></span>{t.dutyCaption}</div>
+        </div>
+        <p className="lead duty__body rv" style={{transitionDelay:'.1s'}}>{t.dutyBody}</p>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- CHANNEL HUB ---------------- */
 function Channels() {
   const { t } = useContext(LangContext);
   return (
     <section className="sec" id="channels">
       <div className="app-pad">
-        <SecHead tag={t.navChannels}>
+        <SecHead tag={t.navChannels} icon="Star">
           <span className="rv">{t.chTitleA}</span> <span style={{color:'var(--ac)'}} className="rv">{t.chTitleB}</span>
         </SecHead>
         <p className="lead rv" style={{marginBottom:'42px'}}>{t.chSub}</p>
         <div className="hub">
           {CHANNELS.map((c,i)=>{
             const IC = Icon[c.icon];
+            const kick = c.key==='kick';
             return (
               <a key={c.key} className="plaque rv" href={c.url} target="_blank" rel="noopener noreferrer"
-                 data-tilt="6" style={{'--pc':c.color, transitionDelay:`${i*0.06}s`}}
+                 data-tilt="6" style={{'--pc':c.color, transitionDelay:`${i*0.05}s`}}
+                 {...(kick?{'data-kpv':''}:{})}
                  onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
                 <span className="plaque__tok"><IC/></span>
                 <span className="plaque__mid">
@@ -164,10 +190,10 @@ function Community() {
   return (
     <section className="sec" id="community">
       <div className="app-pad">
-        <SecHead tag={t.commTag}>{t.commTitle}</SecHead>
+        <SecHead tag={t.commTag} icon="Crown">{t.commTitle}</SecHead>
         <p className="lead rv" style={{marginBottom:'42px'}}>{t.commBody}</p>
         <div className="comm__grid">
-          <div className="panel rv rv-l" data-tilt="6" style={{'--pc':D.color}}>
+          <div className="panel rv rv-l" data-tilt="6">
             <span className="panel__ic"><Icon.Discord/></span>
             <h3>Discord</h3>
             <p>{en?'Real-time chat, go-live pings, clips and giveaways with the squad.':'شات لايف، تنبيهات أول ما البث يبدأ، كليبات وجوايز مع العيلة.'}</p>
@@ -176,7 +202,7 @@ function Community() {
               <Icon.Discord/><span>{t.discordCta}</span>
             </a>
           </div>
-          <div className="panel rv rv-r" data-tilt="6" style={{'--pc':W.color}}>
+          <div className="panel rv rv-r" data-tilt="6">
             <span className="panel__ic"><Icon.WhatsApp/></span>
             <h3>WhatsApp</h3>
             <p>{en?'Follow the official channel so you never miss a go-live.':'تابِع القناة الرسمية علشان عمرك ما تفوّت لايف.'}</p>
@@ -224,4 +250,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Logo, Hero, Channels, About, Community, Footer });
+Object.assign(window, { Logo, Hero, OnDuty, Channels, About, Community, Footer });

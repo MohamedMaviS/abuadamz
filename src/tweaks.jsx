@@ -3,11 +3,11 @@ function TweaksPanel({ tw, set, open, onClose }) {
   const { t } = React.useContext(LangContext);
   const themes = [
     { k:'dynasty', c:'#e9b949', bg:'linear-gradient(135deg,#0a0703,#1b1208)' },
-    { k:'emerald', c:'#53fc18', bg:'linear-gradient(135deg,#04100a,#082417)' },
+    { k:'royal',   c:'#ffcf66', bg:'linear-gradient(135deg,#0c0805,#23160a)' },
     { k:'onyx',    c:'#d9c79a', bg:'linear-gradient(135deg,#08080a,#16161c)' },
     { k:'light',   c:'#a9781f', bg:'linear-gradient(135deg,#efe6d2,#dccfb1)' },
   ];
-  const accents = ['#e9b949','#f5c451','#d9a441','#ffd86b','#c8912b','#53fc18','#39ff6a','#b6ff2e','#e7e7ea','#ff2d3f'];
+  const accents = ['#e9b949','#f5c451','#ffd86b','#ffcf66','#d9a441','#c8912b','#b9822a','#f0e0b0','#d9c79a','#e7e7ea'];
   return (
     <div className="tw">
       <div className="tw__hd"><span>{t.twTitle}</span><button className="tw__x" onClick={onClose} aria-label="Close">✕</button></div>

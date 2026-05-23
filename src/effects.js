@@ -9,7 +9,7 @@
   const DPR = Math.min(1.5, window.devicePixelRatio || 1);
   let W, H, motes = [], raf = 0, paused = false;
 
-  let gold = '#e9b949', volt = '#53fc18';
+  let gold = '#e9b949', volt = '#ffd86b';
   const readVars = () => {
     const cs = getComputedStyle(document.documentElement);
     const a = cs.getPropertyValue('--ac').trim(); if (a) gold = a;

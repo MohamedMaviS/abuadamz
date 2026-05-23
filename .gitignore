@@ -13,3 +13,5 @@ build/
 # logo master (optimized copies live in assets/)
 logo.master.png
 content.png
+
+.vercel
