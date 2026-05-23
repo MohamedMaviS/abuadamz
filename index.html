@@ -102,47 +102,10 @@
   [data-fx="low"] #fx{display:none}
   [data-fx="low"] .grain::after{display:none}
   @keyframes spin{to{transform:rotate(360deg)}}
-  /* loader */
-  #ld{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(120% 100% at 50% 0%,var(--bg-2),var(--bg));
-    transition:opacity .42s ease,filter .42s ease}
-  #ld.out{opacity:0;filter:blur(14px);pointer-events:none}
-  #ld .ld__box{display:flex;flex-direction:column;align-items:center;gap:24px}
-  #ld .ld__crown{width:54px;height:auto;filter:drop-shadow(0 0 18px rgba(233,185,73,.5));animation:ldfloat 2.4s ease-in-out infinite}
-  @keyframes ldfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  #ld .ld__wm{font-family:var(--f-disp);font-weight:900;font-size:clamp(26px,6.5vw,46px);line-height:1;letter-spacing:.14em;
-    background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 52%,var(--gold-3));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 2px 10px rgba(233,185,73,.28))}
-  #ld .ld__ring{position:relative;width:104px;height:104px}
-  #ld .ld__ring svg{width:100%;height:100%;transform:rotate(-90deg);display:block;overflow:visible}
-  #ld .ld__trk{fill:none;stroke:var(--line);stroke-width:4}
-  #ld .ld__bar{fill:none;stroke:var(--ac);stroke-width:4;stroke-linecap:round;
-    filter:drop-shadow(0 0 6px rgba(233,185,73,.6))}
-  #ld .ld__pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-family:var(--f-head);font-weight:700;font-size:23px;color:var(--text);font-variant-numeric:tabular-nums}
-  #ld .ld__pct i{font-style:normal;font-size:13px;color:var(--ac);margin-left:1px}
-  #ld .ld__lab{font-family:var(--f-head);font-weight:600;font-size:11px;letter-spacing:.46em;
-    color:var(--dim);text-transform:uppercase;animation:ldlab 1.3s ease-in-out infinite}
-  @keyframes ldlab{0%,100%{opacity:.4}50%{opacity:1}}
 </style>
 </head>
 <body class="grain">
   <div id="top"></div>
-  <div id="ld">
-    <div class="ld__box">
-      <svg class="ld__crown" viewBox="0 0 64 30" fill="none" aria-hidden="true">
-        <defs><linearGradient id="lcg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fce9a8"/><stop offset="1" stop-color="#b9822a"/></linearGradient></defs>
-        <path d="M4 8 L16 20 L32 4 L48 20 L60 8 L55 28 L9 28 Z" fill="url(#lcg)"/>
-        <circle cx="32" cy="4" r="3" fill="#ffd86b"/><circle cx="4" cy="8" r="2.4" fill="#fce9a8"/><circle cx="60" cy="8" r="2.4" fill="#fce9a8"/>
-      </svg>
-      <div class="ld__wm">ABU ADAMZ</div>
-      <div class="ld__ring">
-        <svg viewBox="0 0 104 104"><circle class="ld__trk" cx="52" cy="52" r="46"/><circle class="ld__bar" cx="52" cy="52" r="46"/></svg>
-        <div class="ld__pct"><span id="ldp">0</span><i>%</i></div>
-      </div>
-      <div class="ld__lab">Loading</div>
-    </div>
-  </div>
   <canvas id="fx"></canvas>
   <div id="app"></div>
 
@@ -174,41 +137,5 @@
     injectSpeedInsights();
   </script>
 
-  <script>
-    (function(){
-      var ld=document.getElementById('ld'), pctEl=document.getElementById('ldp'),
-          bar=ld.querySelector('.ld__bar'), C=2*Math.PI*46,
-          start=performance.now(), mounted=false, done=false, p=0;
-      bar.style.strokeDasharray=C; bar.style.strokeDashoffset=C;
-      function finish(){
-        if(done) return; done=true;
-        pctEl.textContent=100; bar.style.strokeDashoffset=0;
-        setTimeout(function(){ ld.classList.add('out');
-          setTimeout(function(){ ld.parentNode&&ld.parentNode.removeChild(ld); },440); }, 150);
-      }
-      var DUR=2700;
-      function ease(x){ return 1-Math.pow(1-x,2.4); }
-      function frame(){
-        if(done) return;
-        var el=performance.now()-start;
-        var prog=Math.min(1, el/DUR);
-        var e=ease(prog);
-        var target = (prog>=1 && mounted) ? 1 : Math.min(e, 0.985);
-        p += (target-p)*0.16;
-        if(target===1 && (1-p)<0.004) p=1;
-        pctEl.textContent=Math.round(p*100);
-        bar.style.strokeDashoffset=C*(1-p);
-        if(p>=0.999){ finish(); return; }
-        requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-      var mo=new MutationObserver(function(){
-        var a=document.getElementById('app');
-        if(a&&a.children.length){ mo.disconnect(); mounted=true; }
-      });
-      mo.observe(document.getElementById('app'),{childList:true});
-      setTimeout(function(){ mounted=true; },8000);
-    })();
-  </script>
 </body>
 </html>
