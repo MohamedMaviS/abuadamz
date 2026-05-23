@@ -88,9 +88,9 @@ html{ overflow-x:hidden; }
 /* =====================================================================
    HERO
    ===================================================================== */
-.hero{ position:relative; min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-  text-align:center; padding-top:104px; padding-bottom:26px; }
-.hero__in{ display:flex; flex-direction:column; align-items:center; gap:clamp(26px,3.5vw,44px); margin-top:auto; }
+.hero{ position:relative; min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding-top:104px; padding-bottom:34px; }
+.hero__in{ display:flex; flex-direction:column; align-items:center; gap:clamp(26px,3.5vw,44px); flex-shrink:0; }
 
 .hero__crest{ position:relative; transform-style:preserve-3d; }
 .crest__frame{
@@ -145,7 +145,7 @@ html{ overflow-x:hidden; }
 .hero__cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:16px; }
 
 /* scroll cue */
-.scrollcue{ display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; z-index:5; margin-top:auto; margin-bottom:4px; }
+.scrollcue{ display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; z-index:5; margin-top:clamp(40px,5.5vh,66px); flex-shrink:0; }
 .scrollcue__lab{ font-family:var(--f-head); font-weight:600; font-size:10px; letter-spacing:.42em; color:var(--faint); text-transform:uppercase; }
 .scrollcue__mouse{ width:24px; height:38px; border:2px solid var(--ac-soft); border-radius:13px; display:flex; justify-content:center; padding-top:7px;
   box-shadow:0 0 18px rgba(233,185,73,.18); }
