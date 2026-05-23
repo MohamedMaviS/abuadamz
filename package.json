@@ -5,8 +5,7 @@
   "description": "ABU ADAMZ . Streamer / Police RP Commander landing page.",
   "scripts": {
     "dev": "npx serve -l 3000 .",
-    "start": "npx serve -l 3000 .",
-    "build": "node tools/build.js"
+    "start": "npx serve -l 3000 ."
   },
   "keywords": [
     "abu adamz",
