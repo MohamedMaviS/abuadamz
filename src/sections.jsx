@@ -2,13 +2,13 @@ const { useContext } = React;
 
 const KICK_USER = 'abu_adamz';
 const CHANNELS = [
-  { key:'kick',      name:'KICK',      handle:'kick.com/abu_adamz',   url:'https://kick.com/abu_adamz',                                  color:'#f5c451', icon:'Kick' },
-  { key:'youtube',   name:'YOUTUBE',   handle:'@ABU_ADAMZ',           url:'https://www.youtube.com/@ABU_ADAMZ',                          color:'#e9b949', icon:'YouTube' },
-  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@ABUADAMZ',                            color:'#ffd86b', icon:'TikTok' },
-  { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e0b24a', icon:'Instagram' },
-  { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#f0e0b0', icon:'X' },
-  { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#d9a441', icon:'Discord' },
-  { key:'whatsapp',  name:'WHATSAPP',  handle:'Official channel',     url:'https://www.whatsapp.com/channel/0029Vb6dID43AzNXS9Dx4X06',   color:'#c8912b', icon:'WhatsApp' },
+  { key:'kick',      name:'KICK',      handle:'kick.com/abu_adamz',   url:'https://kick.com/abu_adamz',                                  color:'#53fc18', icon:'Kick' },
+  { key:'youtube',   name:'YOUTUBE',   handle:'@ABU_ADAMZ',           url:'https://www.youtube.com/@ABU_ADAMZ',                          color:'#ff0033', icon:'YouTube' },
+  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@ABUADAMZ',                            color:'#25f4ee', icon:'TikTok' },
+  { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e1306c', icon:'Instagram' },
+  { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#ffffff', icon:'X' },
+  { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#5865f2', icon:'Discord' },
+  { key:'whatsapp',  name:'WHATSAPP',  handle:'Official channel',     url:'https://www.whatsapp.com/channel/0029Vb6dID43AzNXS9Dx4X06',   color:'#25d366', icon:'WhatsApp' },
 ];
 
 const LOGO_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
@@ -28,6 +28,29 @@ function SecHead({ tag, icon, children }) {
     <div className="sec__head">
       <div className="tag rv"><span className="tag__star"><IC/></span>{tag}</div>
       <h2 className="h-sec rv" style={{transitionDelay:'.08s'}}>{children}</h2>
+    </div>
+  );
+}
+
+/* rotating hero line: phrases fade out / in on a loop */
+function RotatingLine() {
+  const { t } = useContext(LangContext);
+  const items = t.heroRotate || [];
+  const [idx, setIdx] = React.useState(0);
+  const [show, setShow] = React.useState(true);
+  React.useEffect(() => {
+    setIdx(0); setShow(true);
+    if (items.length < 2) return;
+    let alive = true;
+    const id = setInterval(() => {
+      setShow(false);
+      setTimeout(() => { if (alive) { setIdx(p => (p + 1) % items.length); setShow(true); } }, 440);
+    }, 3000);
+    return () => { alive = false; clearInterval(id); };
+  }, [t]);
+  return (
+    <div className="hero__rotate rv" style={{transitionDelay:'.18s'}}>
+      <span className={`hero__rotate-i ${show ? 'show' : ''}`}>{items[idx]}</span>
     </div>
   );
 }
@@ -60,7 +83,7 @@ function Hero({ isLive }) {
           <div className="tag hero__kick rv"><span className="tag__star"><Icon.Crown/></span>{t.heroKicker}</div>
           <h1 className="hero__name rv" style={{transitionDelay:'.05s'}}>{t.heroName}</h1>
           <div className="hero__sub rv" style={{transitionDelay:'.12s'}}>{t.heroSub}</div>
-          <p className="lead hero__lead rv" style={{transitionDelay:'.18s'}}>{t.heroTagline}</p>
+          <RotatingLine/>
           <div className="hero__cta rv" style={{transitionDelay:'.24s'}}>
             <a className="btn btn-primary" href={KICK} target="_blank" rel="noopener noreferrer"
                data-kpv onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>

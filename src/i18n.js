@@ -11,6 +11,13 @@ const I18N = {
     heroTagline:'Veteran on the scene, live on Kick. Role-playing since 2019, and currently Chief of Police in Last Chance. Long patrols, real authority, and a community that rides every night.',
     heroWatch:'Watch on Kick',
     heroChannels:'All Channels',
+    heroRotate:[
+      'Veteran on the scene · live on Kick',
+      'Role-playing since 2019',
+      'Currently Chief of Police in Last Chance',
+      'Long patrols · real authority',
+      'A community that rides every night',
+    ],
     scroll:'SCROLL',
 
     dutyTag:'ON DUTY',
@@ -58,6 +65,13 @@ const I18N = {
     heroTagline:'راجل محترف في المجال، لايف على Kick. بيلعب رول بلاي من 2019، ودلوقتي ماسك قطاع الشرطة في لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة معاه كل ليلة.',
     heroWatch:'شوفني على Kick',
     heroChannels:'كل القنوات',
+    heroRotate:[
+      'راجل محترف · لايف على Kick',
+      'بيلعب رول بلاي من 2019',
+      'دلوقتي مدير الشرطة في لاست تشانس',
+      'باترولات طويلة · هيبة حقيقية',
+      'وعيلة واقفة معاه كل ليلة',
+    ],
     scroll:'انزل تحت',
 
     dutyTag:'في الخدمة',

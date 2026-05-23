@@ -99,7 +99,9 @@ html{ overflow-x:hidden; }
   background:linear-gradient(var(--bg-2),var(--bg-2)) padding-box,
             linear-gradient(135deg,var(--gold-1),var(--gold-3) 48%,var(--gold-1)) border-box;
   box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 36px 90px rgba(0,0,0,.65), var(--glow);
+  animation:crestFloat 5.5s ease-in-out infinite;
 }
+@keyframes crestFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-13px); } }
 .crest__frame img{ width:100%; height:100%; object-fit:cover; }
 .crest__sheen{ position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.18) 48%,transparent 58%);
@@ -126,8 +128,8 @@ html{ overflow-x:hidden; }
 .hero__copy{ display:flex; flex-direction:column; align-items:center; gap:18px; max-width:760px; }
 .hero__kick{ font-size:12.5px; }
 .hero__name{
-  font-family:var(--f-disp); font-weight:900; line-height:1; letter-spacing:.02em; white-space:nowrap;
-  font-size:clamp(30px,8.4vw,94px);
+  font-family:var(--f-disp); font-weight:700; line-height:1; letter-spacing:.03em; white-space:nowrap; text-transform:uppercase;
+  font-size:clamp(34px,9.6vw,112px);
   background:linear-gradient(100deg,#9c6f23 0%,#e9b949 24%,#fff3cf 48%,#e9b949 62%,#9c6f23 100%);
   background-size:220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
   -webkit-text-fill-color:transparent; animation:sheen 5s linear infinite;
@@ -136,7 +138,11 @@ html{ overflow-x:hidden; }
 @keyframes sheen{ 0%{ background-position:130% 0; } 100%{ background-position:-110% 0; } }
 .hero__sub{ font-family:var(--f-head); font-weight:600; font-size:clamp(13px,2.1vw,17px); letter-spacing:.22em; text-transform:uppercase; color:var(--ac); }
 .hero__lead{ color:var(--dim); margin:0 auto; }
-.hero__cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+.hero__rotate{ min-height:1.9em; display:flex; align-items:center; justify-content:center; max-width:640px; margin:2px auto 0; padding-inline:10px; }
+.hero__rotate-i{ font-family:var(--f-body); font-weight:500; font-size:clamp(15px,1.9vw,19px); line-height:1.5; text-align:center;
+  color:color-mix(in oklab, var(--text) 64%, var(--ac)); opacity:0; transform:translateY(10px); transition:opacity .44s ease, transform .44s ease; }
+.hero__rotate-i.show{ opacity:1; transform:none; }
+.hero__cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:16px; }
 
 /* scroll cue */
 .scrollcue{ display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; z-index:5; margin-top:clamp(28px,4.5vh,52px); }
@@ -155,16 +161,16 @@ html{ overflow-x:hidden; }
 .plaque{
   position:relative; display:flex; align-items:center; gap:16px; padding:18px 20px; border-radius:16px; overflow:hidden;
   border:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.025), transparent);
-  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s; transform-style:preserve-3d;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s, background .3s; transform-style:preserve-3d;
 }
-.plaque__edge{ position:absolute; inset-inline-start:0; top:0; bottom:0; width:3px; background:var(--pc); opacity:.55; transition:opacity .3s, width .3s; }
-.plaque:hover{ transform:translateY(-4px); border-color:color-mix(in oklab,var(--pc) 50%, var(--line)); box-shadow:0 18px 44px rgba(0,0,0,.45); }
-.plaque:hover .plaque__edge{ opacity:1; width:5px; }
+.plaque__edge{ position:absolute; inset-inline-start:0; top:0; bottom:0; width:3px; background:var(--ac); opacity:.3; transition:opacity .3s, width .3s, background .3s; }
+.plaque:hover{ transform:translateY(-5px); border-color:color-mix(in oklab,var(--pc) 55%, var(--line)); background:linear-gradient(180deg, color-mix(in oklab,var(--pc) 9%, transparent), transparent); box-shadow:0 20px 46px rgba(0,0,0,.5), 0 0 34px color-mix(in oklab,var(--pc) 20%, transparent); }
+.plaque:hover .plaque__edge{ opacity:1; width:5px; background:var(--pc); }
 .plaque__tok{ width:54px; height:54px; flex:none; border-radius:13px; display:grid; place-items:center; color:var(--text);
   border:1px solid var(--line); background:radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.06), transparent);
   transition:color .3s, border-color .3s, box-shadow .3s; }
 .plaque__tok svg{ width:26px; height:26px; }
-.plaque:hover .plaque__tok{ color:var(--pc); border-color:color-mix(in oklab,var(--pc) 55%, transparent); box-shadow:0 0 26px color-mix(in oklab,var(--pc) 35%, transparent); }
+.plaque:hover .plaque__tok{ color:var(--pc); border-color:color-mix(in oklab,var(--pc) 55%, transparent); background:radial-gradient(120% 120% at 30% 20%, color-mix(in oklab,var(--pc) 22%, transparent), transparent); box-shadow:0 0 26px color-mix(in oklab,var(--pc) 35%, transparent); }
 .plaque__mid{ display:flex; flex-direction:column; gap:3px; min-width:0; }
 .plaque__name{ font-family:var(--f-head); font-weight:700; font-size:16.5px; letter-spacing:.08em; color:var(--text); }
 .plaque__handle{ font-family:var(--f-body); font-size:13px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -371,6 +377,21 @@ html:not(.ready) .rv{ opacity:0; }
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .crest__sheen, .crest__rays, .hero__name, .scrollcue__mouse i, .scrollcue__chev, .mq__track{ animation:none !important; }
+  .crest__sheen, .crest__rays, .crest__frame, .hero__name, .scrollcue__mouse i, .scrollcue__chev, .mq__track{ animation:none !important; }
   .rv{ transition-duration:.001s; }
+  .hero__rotate-i{ transition-duration:.001s; }
 }
+
+/* ===== Arabic / RTL: Arabic face for display + no Latin letter-spacing (it breaks cursive joins) ===== */
+[dir="rtl"] .tag, [dir="rtl"] .hero__sub, [dir="rtl"] .hero__rotate-i, [dir="rtl"] .lead,
+[dir="rtl"] .h-sec, [dir="rtl"] .about__title, [dir="rtl"] .cred__v, [dir="rtl"] .cred__l,
+[dir="rtl"] .tags span, [dir="rtl"] .btn, [dir="rtl"] .nav__links a, [dir="rtl"] .livepill,
+[dir="rtl"] .scrollcue__lab, [dir="rtl"] .crest__live, [dir="rtl"] .duty__cap,
+[dir="rtl"] .footer__tag, [dir="rtl"] .footer__bottom, [dir="rtl"] .mq__track i,
+[dir="rtl"] .panel p, [dir="rtl"] .tw__hd, [dir="rtl"] .tw__lab, [dir="rtl"] .seg button,
+[dir="rtl"] .themes button{
+  font-family:var(--f-ar);
+  letter-spacing:0;
+}
+[dir="rtl"] .h-sec, [dir="rtl"] .about__title, [dir="rtl"] .footer__tag,
+[dir="rtl"] .cred__v, [dir="rtl"] .mq__track i{ font-weight:900; }

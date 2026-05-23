@@ -34,7 +34,7 @@ const Icon = {
   ),
   Kick: () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M3 3h4.5v5.25h1.5V6.75h1.5V5.25h1.5V3.75h1.5V3H18v4.5h-1.5v1.5H15v1.5h-1.5v1.5h-1.5V12H15v1.5h1.5V15H18v4.5h-4.5v-1.5H12v-1.5h-1.5v-1.5H9v-1.5H7.5V21H3V3z"/>
+      <path d="M4 4h5v5h2V7h2V5h2V4h5v6h-2v2h-2v2h2v2h2v6h-5v-2h-2v-2h-2v-2H9v6H4V4z"/>
     </svg>
   ),
   Crown: () => (
