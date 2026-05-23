@@ -8,7 +8,7 @@ const I18N = {
     heroKicker:'STREAMER · POLICE RP COMMANDER · GTA',
     heroName:'ABU ADAMZ',
     heroSub:'CHIEF OF POLICE · LAST CHANCE RP',
-    heroTagline:'Veteran on the scene, live on Kick. Chief of Police in Last Chance since 2019. Long patrols, real authority, and a community that rides every night.',
+    heroTagline:'Veteran on the scene, live on Kick. Role-playing since 2019, and currently Chief of Police in Last Chance. Long patrols, real authority, and a community that rides every night.',
     heroWatch:'Watch on Kick',
     heroChannels:'All Channels',
     scroll:'SCROLL',
@@ -25,7 +25,7 @@ const I18N = {
 
     aboutTag:'WHO IS',
     aboutTitle:'ABU ADAMZ',
-    aboutBody:'Mohamed Ahmed, known to everyone as Abu Adam. A veteran of the scene at 45, gaming has been his life for years. Since 2019 he has lived and breathed police role-play, rising to Chief of Police in the city of Last Chance. Long patrols, real authority, and a community that rides with him every night.',
+    aboutBody:'Mohamed Ahmed, known to everyone as Abu Adam. A veteran of the scene at 45, gaming has been his life for years. He has been deep in police role-play since 2019, and today he runs the streets as Chief of Police in the city of Last Chance. Long patrols, real authority, and a community that rides with him every night.',
     creds:[
       { v:'45',          l:'YEARS OLD' },
       { v:'2019',        l:'ON PATROL SINCE' },
@@ -55,7 +55,7 @@ const I18N = {
     heroKicker:'ستريمر · قائد شرطة رول بلاي · جاتا',
     heroName:'ABU ADAMZ',
     heroSub:'مدير الشرطة · لاست تشانس رول بلاي',
-    heroTagline:'راجل محترف في المجال، لايف على Kick. ماسك قطاع الشرطة في لاست تشانس من 2019. باترولات طويلة، هيبة حقيقية، وعيلة واقفة معاه كل ليلة.',
+    heroTagline:'راجل محترف في المجال، لايف على Kick. بيلعب رول بلاي من 2019، ودلوقتي ماسك قطاع الشرطة في لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة معاه كل ليلة.',
     heroWatch:'شوفني على Kick',
     heroChannels:'كل القنوات',
     scroll:'انزل تحت',
@@ -72,7 +72,7 @@ const I18N = {
 
     aboutTag:'مين هو',
     aboutTitle:'ابو ادم',
-    aboutBody:'محمد أحمد، اللي الكل يعرفه باسم ابو ادم. راجل محترم وابن 45 سنة، والجيمنج حياته من زمان. من 2019 وهو عايش الرول بلاي بتاع الشرطة لحد ما بقى ماسك قطاع الشرطة في مدينة لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة جنبه كل ليلة.',
+    aboutBody:'محمد أحمد، اللي الكل يعرفه باسم ابو ادم. راجل محترم وابن 45 سنة، والجيمنج حياته من زمان. بيلعب رول بلاي الشرطة من 2019، ودلوقتي ماسك قطاع الشرطة في مدينة لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة جنبه كل ليلة.',
     creds:[
       { v:'45',          l:'سنة' },
       { v:'2019',        l:'في الخدمة من' },
