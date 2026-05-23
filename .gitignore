@@ -1,0 +1,15 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.vercel
+.env
+.env*.local
+.vscode/
+.idea/
+dist/
+build/
+
+# logo master (optimized copies live in assets/)
+logo.master.png
+content.png
