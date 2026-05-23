@@ -43,7 +43,7 @@
     };
   }
   function make() {
-    const n = innerWidth < 768 ? 34 : 64;
+    const n = innerWidth < 768 ? 20 : 42;
     motes = [];
     for (let i = 0; i < n; i++) motes.push(spawn(true));
   }
@@ -70,16 +70,9 @@
 
     ctx.clearRect(0, 0, W, H);
 
-    // breathing central gold glow
-    const pulse = 0.5 + 0.5 * Math.sin(now * 0.0006);
-    const cg = ctx.createRadialGradient(W * 0.5, H * 0.34, 0, W * 0.5, H * 0.34, Math.max(W, H) * 0.5);
-    cg.addColorStop(0, `rgba(${gr},${gg},${gb},${0.05 + pulse * 0.035})`);
-    cg.addColorStop(0.5, `rgba(${gr},${gg},${gb},0.012)`);
-    cg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = cg;
-    ctx.fillRect(0, 0, W, H);
+    // (central gold glow is a static CSS gradient now — cheaper than a per-frame fill)
 
-    // rising gold/green motes
+    // rising gold motes
     ctx.globalCompositeOperation = 'lighter';
     for (const m of motes) {
       m.y -= m.sp;

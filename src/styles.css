@@ -29,7 +29,7 @@ html{ overflow-x:hidden; }
   color:var(--text);
 }
 
-.sec{ position:relative; padding-block:clamp(64px,9vw,128px); }
+.sec{ position:relative; padding-block:clamp(40px,5vw,72px); }
 .sec__head{ margin-bottom:18px; }
 .sec__head .tag{ margin-bottom:18px; }
 
@@ -63,7 +63,7 @@ html{ overflow-x:hidden; }
    NAV
    ===================================================================== */
 .nav{ position:fixed; inset:0 0 auto 0; z-index:120; transition:background .3s, box-shadow .3s, backdrop-filter .3s; }
-.nav.scrolled{ background:color-mix(in oklab,var(--bg) 78%, transparent); backdrop-filter:blur(14px) saturate(1.2); box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(0,0,0,.3); }
+.nav.scrolled{ background:color-mix(in oklab,var(--bg) 86%, transparent); backdrop-filter:blur(10px) saturate(1.15); box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(0,0,0,.3); }
 .nav__bar{ width:100%; max-width:1280px; margin-inline:auto; padding:14px clamp(16px,4vw,40px); display:flex; align-items:center; gap:18px; }
 .brand{ display:inline-flex; align-items:center; gap:12px; }
 .brand__mk{ width:42px; height:42px; border-radius:11px; overflow:hidden; flex:none;
@@ -88,9 +88,9 @@ html{ overflow-x:hidden; }
 /* =====================================================================
    HERO
    ===================================================================== */
-.hero{ position:relative; min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding-top:104px; padding-bottom:46px; }
-.hero__in{ display:flex; flex-direction:column; align-items:center; gap:clamp(30px,4vw,50px); }
+.hero{ position:relative; min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  text-align:center; padding-top:104px; padding-bottom:26px; }
+.hero__in{ display:flex; flex-direction:column; align-items:center; gap:clamp(26px,3.5vw,44px); margin-top:auto; }
 
 .hero__crest{ position:relative; transform-style:preserve-3d; }
 .crest__frame{
@@ -145,7 +145,7 @@ html{ overflow-x:hidden; }
 .hero__cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:16px; }
 
 /* scroll cue */
-.scrollcue{ display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; z-index:5; margin-top:clamp(28px,4.5vh,52px); }
+.scrollcue{ display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; z-index:5; margin-top:auto; margin-bottom:4px; }
 .scrollcue__lab{ font-family:var(--f-head); font-weight:600; font-size:10px; letter-spacing:.42em; color:var(--faint); text-transform:uppercase; }
 .scrollcue__mouse{ width:24px; height:38px; border:2px solid var(--ac-soft); border-radius:13px; display:flex; justify-content:center; padding-top:7px;
   box-shadow:0 0 18px rgba(233,185,73,.18); }
@@ -212,7 +212,7 @@ html{ overflow-x:hidden; }
 .tags span:hover{ color:var(--ac); border-color:var(--ac-soft); }
 
 /* marquee */
-.mq{ margin-top:clamp(46px,6vw,80px); border-block:1px solid var(--line); padding-block:18px; overflow:hidden; -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); }
+.mq{ margin-top:clamp(30px,4vw,52px); border-block:1px solid var(--line); padding-block:16px; overflow:hidden; -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); }
 .mq__track{ display:inline-flex; white-space:nowrap; animation:mqscroll 26s linear infinite; }
 [dir="rtl"] .mq__track{ animation-direction:reverse; }
 .mq__track i{ display:inline-flex; align-items:center; }
@@ -367,6 +367,10 @@ html:not(.ready) .rv{ opacity:0; }
   .comm__grid{ grid-template-columns:1fr; }
   .brand__wm{ font-size:16px; letter-spacing:.12em; }
   .nav__right .livepill{ display:none; }
+  .sec{ padding-block:clamp(34px,7vw,52px); }
+  .duty__frame{ aspect-ratio:3/2; }
+  .duty__body{ margin-top:18px; }
+  .mq{ margin-top:30px; }
 }
 @media (max-width:480px){
   .creds{ grid-template-columns:repeat(2,1fr); }
