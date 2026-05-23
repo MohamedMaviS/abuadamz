@@ -3,7 +3,7 @@ const I18N = {
   en: {
     dir:'ltr',
     navAbout:'The Commander', navChannels:'Channels', navCommunity:'Community',
-    watchLive:'Watch Live', live:'LIVE NOW', offline:'OFFLINE',
+    watchLive:'Watch Live', live:'LIVE NOW', offline:'OFFLINE', liveTag:'LIVE', offTag:'OFFLINE',
 
     heroKicker:'STREAMER · POLICE RP COMMANDER · GTA',
     heroName:'ABU ADAMZ',
@@ -57,7 +57,7 @@ const I18N = {
   ar: {
     dir:'rtl',
     navAbout:'القائد', navChannels:'القنوات', navCommunity:'العيلة',
-    watchLive:'شوف اللايف', live:'لايف دلوقتي', offline:'مش لايف',
+    watchLive:'شوف اللايف', live:'لايف دلوقتي', offline:'مش لايف', liveTag:'لايف', offTag:'أوفلاين',
 
     heroKicker:'ستريمر · قائد شرطة رول بلاي · جاتا',
     heroName:'ABU ADAMZ',

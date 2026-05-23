@@ -75,7 +75,7 @@ function Hero({ isLive }) {
           </div>
           <a className="crest__live" data-live={isLive} href={KICK} target="_blank" rel="noopener noreferrer"
              data-kpv onMouseEnter={()=>window.__hover?.()}>
-            <span className="dot"></span><span>{isLive ? t.live : t.offline}</span>
+            <span className="dot"></span><span>{isLive ? t.liveTag : t.offTag}</span>
           </a>
         </div>
 

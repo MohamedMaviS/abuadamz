@@ -119,11 +119,11 @@ html{ overflow-x:hidden; }
 .crest__cn--tr{ top:-7px; right:-7px; border-left:0; border-bottom:0; border-top-right-radius:8px; }
 .crest__cn--bl{ bottom:-7px; left:-7px; border-right:0; border-top:0; border-bottom-left-radius:8px; }
 .crest__cn--br{ bottom:-7px; right:-7px; border-left:0; border-top:0; border-bottom-right-radius:8px; }
-.crest__live{ position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-  display:inline-flex; align-items:center; gap:8px; font-family:var(--f-head); font-weight:700; font-size:11.5px; letter-spacing:.12em;
-  padding:7px 14px; border-radius:999px; backdrop-filter:blur(8px);
-  background:rgba(10,7,3,.66); border:1px solid var(--line); color:var(--dim); }
-.crest__live[data-live="true"]{ color:var(--volt); border-color:var(--volt); }
+.crest__live{ position:absolute; top:13px; inset-inline-start:13px;
+  display:inline-flex; align-items:center; gap:7px; font-family:var(--f-head); font-weight:700; font-size:10.5px; letter-spacing:.14em;
+  padding:6px 12px; border-radius:999px; backdrop-filter:blur(10px); z-index:3;
+  background:rgba(10,7,3,.74); border:1px solid var(--ac-soft); color:var(--text); box-shadow:0 6px 18px rgba(0,0,0,.45); }
+.crest__live[data-live="true"]{ color:var(--volt); border-color:var(--volt); box-shadow:0 0 20px var(--volt-soft); }
 
 .hero__copy{ display:flex; flex-direction:column; align-items:center; gap:18px; max-width:760px; }
 .hero__kick{ font-size:12.5px; }
@@ -196,10 +196,17 @@ html{ overflow-x:hidden; }
 .about__copy{ display:flex; flex-direction:column; gap:18px; }
 .about__title{ font-family:var(--f-disp); font-weight:900; font-size:clamp(34px,6vw,68px); line-height:1; letter-spacing:.02em;
   background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 52%,var(--gold-3)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.creds{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:6px; }
-.cred{ padding:16px 14px; border-radius:13px; border:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.025), transparent); text-align:center; }
-.cred__v{ font-family:var(--f-disp); font-weight:800; font-size:clamp(18px,2.4vw,26px); color:var(--ac); line-height:1.05; }
-.cred__l{ font-family:var(--f-head); font-weight:600; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-top:6px; }
+.creds{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:10px; }
+.cred{ position:relative; padding:20px 12px 15px; border-radius:15px; overflow:hidden; text-align:center;
+  border:1px solid var(--ac-soft); background:linear-gradient(180deg, rgba(233,185,73,.08), rgba(233,185,73,.012));
+  transition:transform .3s, border-color .3s, box-shadow .3s; }
+.cred::before{ content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:46%; height:2px;
+  background:linear-gradient(90deg,transparent,var(--ac),transparent); opacity:.7; }
+.cred:hover{ transform:translateY(-5px); border-color:color-mix(in oklab,var(--ac) 60%, transparent); box-shadow:0 16px 36px rgba(0,0,0,.45), 0 0 24px var(--ac-soft); }
+.cred__v{ font-family:var(--f-disp); font-weight:700; font-size:clamp(18px,2.2vw,25px); line-height:1.1; letter-spacing:.01em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; min-height:2.3em;
+  background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 52%,var(--gold-3)); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+.cred__l{ font-family:var(--f-head); font-weight:600; font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin-top:8px; line-height:1.35; }
 .tags{ display:flex; flex-wrap:wrap; gap:9px; margin-top:6px; }
 .tags span{ font-family:var(--f-head); font-weight:600; font-size:12px; letter-spacing:.08em; color:var(--dim); padding:8px 14px; border-radius:999px; border:1px solid var(--line); transition:color .2s, border-color .2s; }
 .tags span:hover{ color:var(--ac); border-color:var(--ac-soft); }
