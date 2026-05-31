@@ -351,6 +351,36 @@ html:not(.ready) .rv{ opacity:0; }
 .kpv__vol{ width:74px; accent-color:var(--ac); cursor:pointer; }
 
 /* =====================================================================
+   MUSIC PLAYER (fixed bottom-left pill)
+   ===================================================================== */
+.music{ position:fixed; bottom:18px; left:18px; z-index:200;
+  display:flex; align-items:center; gap:10px;
+  padding:7px 11px 7px 7px; border-radius:999px;
+  background:rgba(10,7,3,.78); backdrop-filter:blur(12px) saturate(1.1);
+  border:1px solid var(--ac-soft); box-shadow:0 14px 36px rgba(0,0,0,.55), 0 0 20px rgba(233,185,73,.14);
+  max-width:min(340px, calc(100vw - 36px)); }
+.music__pp{ width:36px; height:36px; flex:none; border-radius:50%; display:grid; place-items:center; cursor:pointer;
+  border:0; color:#1a1206;
+  background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 55%,var(--gold-3));
+  box-shadow:0 0 16px rgba(233,185,73,.36); transition:transform .25s, box-shadow .25s; }
+.music__pp:hover{ transform:scale(1.06); box-shadow:0 0 22px rgba(233,185,73,.55); }
+.music__pp svg{ width:17px; height:17px; }
+.music__mid{ display:flex; align-items:center; gap:8px; min-width:60px; flex:1; min-width:0; }
+.music__eq{ display:inline-flex; align-items:flex-end; gap:2px; width:13px; height:14px; flex:none; }
+.music__eq i{ display:block; width:3px; background:var(--ac); border-radius:1px; height:30%; animation:eq 1s ease-in-out infinite; }
+.music__eq i:nth-child(2){ animation-delay:.15s; }
+.music__eq i:nth-child(3){ animation-delay:.3s; }
+@keyframes eq{ 0%,100%{ height:30%; } 50%{ height:100%; } }
+.music[data-playing="false"] .music__eq i{ animation:none; height:30%; opacity:.4; }
+.music__title{ font-family:var(--f-ar); font-weight:700; font-size:13px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.music__ctrl{ display:inline-flex; align-items:center; gap:3px; flex:none; }
+.music__ctrl button{ width:26px; height:26px; display:grid; place-items:center; border-radius:7px; cursor:pointer;
+  border:1px solid var(--line); background:transparent; color:var(--dim); transition:color .2s, border-color .2s; }
+.music__ctrl button:hover{ color:var(--ac); border-color:var(--ac); }
+.music__ctrl button svg{ width:13px; height:13px; }
+
+/* =====================================================================
    RESPONSIVE
    ===================================================================== */
 @media (max-width:900px){
@@ -380,6 +410,10 @@ html:not(.ready) .rv{ opacity:0; }
   .footer__soc a{ width:42px; height:42px; }
   .nav__bar{ gap:10px; }
   .livepill{ padding:8px 12px; }
+  .music{ bottom:12px; left:12px; max-width:calc(100vw - 24px); padding:6px 9px 6px 6px; gap:7px; }
+  .music__pp{ width:32px; height:32px; }
+  .music__title{ font-size:12px; }
+  .music__ctrl button{ width:24px; height:24px; }
 }
 @media (max-width:380px){
   .langtog button{ padding:7px 10px; }

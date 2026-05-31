@@ -46,6 +46,7 @@ function App(){
       <Footer/>
       <TweaksPanel tw={tw} set={set} open={panel} onClose={()=>setPanel(false)}/>
       <KickPreview/>
+      <MusicPlayer/>
     </LangContext.Provider>
   );
 }
@@ -134,6 +135,91 @@ function KickPreview(){
             onChange={(e)=>{const v=parseFloat(e.target.value);setVol(v);setMuted(v===0);}}
             onClick={(e)=>e.stopPropagation()} aria-label="Volume"/>
         </span>
+      </div>
+    </div>
+  );
+}
+
+/* Music player — fixed bottom-left, gold pill. Auto-starts on first user interaction. */
+function MusicPlayer(){
+  const TRACKS = [
+    { title:'صلعة البلّور',       src:'assets/music/track1.mp3' },
+    { title:'صلعة ملوكي',         src:'assets/music/track2.mp3' },
+    { title:'يا أبو آدم أصلع',     src:'assets/music/track3.mp3' },
+  ];
+  const [idx, setIdx] = React.useState(0);
+  const [playing, setPlaying] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+  const audioRef = React.useRef(null);
+  const startedRef = React.useRef(false);
+
+  React.useEffect(()=>{
+    const a = audioRef.current; if(!a) return;
+    a.volume = 0.55;
+    const onEnd = ()=>setIdx(p=>(p+1)%TRACKS.length);
+    a.addEventListener('ended', onEnd);
+    return ()=>a.removeEventListener('ended', onEnd);
+  },[]);
+
+  React.useEffect(()=>{
+    const a = audioRef.current; if(!a) return;
+    a.load();
+    if(playing) a.play().catch(()=>{});
+  },[idx]);
+
+  React.useEffect(()=>{
+    const a = audioRef.current; if(!a) return;
+    if(playing){ a.play().catch(()=>setPlaying(false)); } else { a.pause(); }
+  },[playing]);
+
+  React.useEffect(()=>{
+    const a = audioRef.current; if(!a) return;
+    a.muted = muted;
+  },[muted]);
+
+  /* Auto-start on first interaction (click / scroll / key / touch). */
+  React.useEffect(()=>{
+    const events = ['pointerdown','click','touchstart','keydown','wheel','scroll'];
+    const start = ()=>{
+      if(startedRef.current) return;
+      startedRef.current = true;
+      const a = audioRef.current;
+      if(a){
+        const p = a.play();
+        if(p && p.then) p.then(()=>setPlaying(true)).catch(()=>{ startedRef.current=false; });
+        else setPlaying(true);
+      }
+      events.forEach(e=>window.removeEventListener(e, start, true));
+    };
+    events.forEach(e=>window.addEventListener(e, start, true));
+    return ()=>events.forEach(e=>window.removeEventListener(e, start, true));
+  },[]);
+
+  const t = TRACKS[idx];
+  return (
+    <div className="music" data-playing={playing}>
+      <audio ref={audioRef} src={t.src} preload="metadata"/>
+      <button className="music__pp" onClick={()=>{ setPlaying(p=>!p); window.__click?.(); }} aria-label={playing?'Pause':'Play'}>
+        {playing
+          ? <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          : <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>}
+      </button>
+      <div className="music__mid">
+        <span className="music__eq" aria-hidden="true"><i/><i/><i/></span>
+        <span className="music__title">{t.title}</span>
+      </div>
+      <div className="music__ctrl">
+        <button onClick={()=>{ setIdx(p=>(p-1+TRACKS.length)%TRACKS.length); window.__click?.(); }} aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zM20 6v12L10 12z"/></svg>
+        </button>
+        <button onClick={()=>{ setIdx(p=>(p+1)%TRACKS.length); window.__click?.(); }} aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 6h2v12h-2zM4 6v12l10-6z"/></svg>
+        </button>
+        <button onClick={()=>{ setMuted(m=>!m); window.__click?.(); }} aria-label={muted?'Unmute':'Mute'}>
+          {muted
+            ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>}
+        </button>
       </div>
     </div>
   );
