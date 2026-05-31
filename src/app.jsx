@@ -140,42 +140,41 @@ function KickPreview(){
   );
 }
 
-/* Music player — fixed bottom-left, gold pill. Auto-starts on first user interaction. */
+/* Music player — floating launcher + expandable panel (playlist, seek, volume).
+   Auto-starts on first user interaction. Gold theme. */
+function fmtTime(s){ if(!s||!isFinite(s)) return '0:00'; const m=Math.floor(s/60); const ss=Math.floor(s%60); return m+':'+String(ss).padStart(2,'0'); }
+
 function MusicPlayer(){
   const TRACKS = [
-    { title:'صلعة البلّور',       src:'assets/music/track1.mp3' },
-    { title:'صلعة ملوكي',         src:'assets/music/track2.mp3' },
-    { title:'يا أبو آدم أصلع',     src:'assets/music/track3.mp3' },
+    { title:'صلعة البلّور',    src:'assets/music/track1.mp3' },
+    { title:'صلعة ملوكي',      src:'assets/music/track2.mp3' },
+    { title:'يا أبو آدم أصلع',  src:'assets/music/track3.mp3' },
   ];
-  const [idx, setIdx] = React.useState(0);
+  const ARTIST = 'ABU ADAMZ · 2026';
+  const [idx, setIdx]       = React.useState(0);
   const [playing, setPlaying] = React.useState(false);
-  const [muted, setMuted] = React.useState(false);
-  const audioRef = React.useRef(null);
-  const startedRef = React.useRef(false);
+  const [open, setOpen]     = React.useState(false);
+  const [vol, setVol]       = React.useState(0.55);
+  const [muted, setMuted]   = React.useState(false);
+  const [cur, setCur]       = React.useState(0);
+  const [dur, setDur]       = React.useState(0);
+  const audioRef  = React.useRef(null);
+  const startedRef= React.useRef(false);
 
   React.useEffect(()=>{
     const a = audioRef.current; if(!a) return;
-    a.volume = 0.55;
-    const onEnd = ()=>setIdx(p=>(p+1)%TRACKS.length);
+    const onEnd  = ()=>setIdx(p=>(p+1)%TRACKS.length);
+    const onTime = ()=>setCur(a.currentTime||0);
+    const onMeta = ()=>setDur(a.duration||0);
     a.addEventListener('ended', onEnd);
-    return ()=>a.removeEventListener('ended', onEnd);
+    a.addEventListener('timeupdate', onTime);
+    a.addEventListener('loadedmetadata', onMeta);
+    return ()=>{ a.removeEventListener('ended',onEnd); a.removeEventListener('timeupdate',onTime); a.removeEventListener('loadedmetadata',onMeta); };
   },[]);
 
-  React.useEffect(()=>{
-    const a = audioRef.current; if(!a) return;
-    a.load();
-    if(playing) a.play().catch(()=>{});
-  },[idx]);
-
-  React.useEffect(()=>{
-    const a = audioRef.current; if(!a) return;
-    if(playing){ a.play().catch(()=>setPlaying(false)); } else { a.pause(); }
-  },[playing]);
-
-  React.useEffect(()=>{
-    const a = audioRef.current; if(!a) return;
-    a.muted = muted;
-  },[muted]);
+  React.useEffect(()=>{ const a=audioRef.current; if(!a) return; a.load(); setCur(0); if(playing) a.play().catch(()=>{}); },[idx]);
+  React.useEffect(()=>{ const a=audioRef.current; if(!a) return; if(playing){ a.play().catch(()=>setPlaying(false)); } else { a.pause(); } },[playing]);
+  React.useEffect(()=>{ const a=audioRef.current; if(!a) return; a.volume=vol; a.muted=muted; },[vol,muted]);
 
   /* Auto-start on first interaction (click / scroll / key / touch). */
   React.useEffect(()=>{
@@ -184,43 +183,86 @@ function MusicPlayer(){
       if(startedRef.current) return;
       startedRef.current = true;
       const a = audioRef.current;
-      if(a){
-        const p = a.play();
-        if(p && p.then) p.then(()=>setPlaying(true)).catch(()=>{ startedRef.current=false; });
-        else setPlaying(true);
-      }
+      if(a){ const p=a.play(); if(p&&p.then) p.then(()=>setPlaying(true)).catch(()=>{ startedRef.current=false; }); else setPlaying(true); }
       events.forEach(e=>window.removeEventListener(e, start, true));
     };
     events.forEach(e=>window.addEventListener(e, start, true));
     return ()=>events.forEach(e=>window.removeEventListener(e, start, true));
   },[]);
 
+  const seekTo = (e)=>{ const a=audioRef.current; if(!a||!dur) return; const r=e.currentTarget.getBoundingClientRect(); let x=(e.clientX-r.left)/r.width; x=Math.max(0,Math.min(1,x)); a.currentTime=x*dur; setCur(a.currentTime); };
+  const pick = (i)=>{ setIdx(i); setPlaying(true); window.__click?.(); };
+
   const t = TRACKS[idx];
+  const pct = dur ? (cur/dur*100) : 0;
+
   return (
-    <div className="music" data-playing={playing}>
+    <div className={`mp ${open?'is-open':''}`} data-playing={playing}>
       <audio ref={audioRef} src={t.src} preload="metadata"/>
-      <button className="music__pp" onClick={()=>{ setPlaying(p=>!p); window.__click?.(); }} aria-label={playing?'Pause':'Play'}>
-        {playing
-          ? <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-          : <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>}
+
+      <div className="mp__panel" role="region" aria-label="Music player" aria-hidden={!open}>
+        <div className="mp__hd">
+          <span className="mp__hdlab"><span className="mp__eq"><i/><i/><i/></span>NOW PLAYING · {idx+1}/{TRACKS.length}</span>
+          <button className="mp__x" onClick={()=>{ setOpen(false); window.__click?.(); }} aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+
+        <div className="mp__now">
+          <div className="mp__cover"><span className="mp__eq mp__eq--cover"><i/><i/><i/><i/></span></div>
+          <div className="mp__nowtxt">
+            <div className="mp__title">{t.title}</div>
+            <div className="mp__artist">{ARTIST}</div>
+          </div>
+        </div>
+
+        <div className="mp__seek" dir="ltr">
+          <div className="mp__bar" onClick={seekTo}>
+            <div className="mp__fill" style={{width:pct+'%'}}/>
+            <span className="mp__knob" style={{left:pct+'%'}}/>
+          </div>
+          <div className="mp__time"><span>{fmtTime(cur)}</span><span>{fmtTime(dur)}</span></div>
+        </div>
+
+        <div className="mp__ctrls">
+          <button className="mp__btn" onClick={()=>{ setIdx(p=>(p-1+TRACKS.length)%TRACKS.length); window.__click?.(); }} aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 6h2v12H7zM20 6v12L9.5 12z"/></svg>
+          </button>
+          <button className="mp__pp" onClick={()=>{ setPlaying(p=>!p); window.__click?.(); }} aria-label={playing?'Pause':'Play'}>
+            {playing
+              ? <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>
+              : <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>}
+          </button>
+          <button className="mp__btn" onClick={()=>{ setIdx(p=>(p+1)%TRACKS.length); window.__click?.(); }} aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15 6h2v12h-2zM4 6v12l10.5-6z"/></svg>
+          </button>
+          <div className="mp__vol">
+            <button className="mp__btn" onClick={()=>{ setMuted(m=>!m); window.__click?.(); }} aria-label={muted?'Unmute':'Mute'}>
+              {(muted||vol===0)
+                ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M18.07 5.93a9 9 0 0 1 0 12.14"/></svg>}
+            </button>
+            <input className="mp__volbar" type="range" min="0" max="1" step="0.02" value={muted?0:vol}
+              onChange={(e)=>{ const v=parseFloat(e.target.value); setVol(v); setMuted(v===0); }} aria-label="Volume"/>
+          </div>
+        </div>
+
+        <div className="mp__list">
+          {TRACKS.map((tr,i)=>(
+            <button key={i} className={`mp__row ${i===idx?'on':''}`} onClick={()=>pick(i)}>
+              <span className="mp__num">{String(i+1).padStart(2,'0')}</span>
+              <span className="mp__rowtitle">{tr.title}</span>
+              {i===idx
+                ? <span className="mp__eq mp__eq--row" aria-hidden="true"><i/><i/><i/></span>
+                : <span className="mp__rowplay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button className="mp__fab" onClick={()=>{ setOpen(o=>!o); window.__click?.(); }} aria-label="Music player" aria-expanded={open}>
+        <span className="mp__eq mp__eq--fab" aria-hidden="true"><i/><i/><i/><i/></span>
       </button>
-      <div className="music__mid">
-        <span className="music__eq" aria-hidden="true"><i/><i/><i/></span>
-        <span className="music__title">{t.title}</span>
-      </div>
-      <div className="music__ctrl">
-        <button onClick={()=>{ setIdx(p=>(p-1+TRACKS.length)%TRACKS.length); window.__click?.(); }} aria-label="Previous">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zM20 6v12L10 12z"/></svg>
-        </button>
-        <button onClick={()=>{ setIdx(p=>(p+1)%TRACKS.length); window.__click?.(); }} aria-label="Next">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 6h2v12h-2zM4 6v12l10-6z"/></svg>
-        </button>
-        <button onClick={()=>{ setMuted(m=>!m); window.__click?.(); }} aria-label={muted?'Unmute':'Mute'}>
-          {muted
-            ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>}
-        </button>
-      </div>
     </div>
   );
 }
