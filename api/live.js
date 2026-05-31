@@ -40,11 +40,13 @@ async function checkKick() {
     if (ls) {
       const live = (typeof ls.is_live === 'boolean') ? ls.is_live : true;
       const cat = ls.categories && ls.categories[0] && ls.categories[0].name;
+      const thumb = ls.thumbnail && (ls.thumbnail.url || ls.thumbnail.src);
       return {
         live,
         title: (ls.session_title || '').trim(),
         viewers: (typeof ls.viewer_count === 'number') ? ls.viewer_count : null,
         category: cat || '',
+        thumb: thumb || '',
       };
     }
     return { live: false };
@@ -106,6 +108,7 @@ export default async function handler() {
       title: kick.title || '',
       viewers: (typeof kick.viewers === 'number') ? kick.viewers : null,
       category: kick.category || '',
+      thumb: kick.thumb || '',
     },
     debug: { kick: kick.live, youtube, tiktok },
   };
