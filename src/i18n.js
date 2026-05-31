@@ -25,6 +25,15 @@ const I18N = {
     dutyBody:'Front and center with the whole department. Abu Adamz runs the precinct in Last Chance, leading every briefing, every patrol, and every call on the streets.',
     dutyCaption:'LAST CHANCE · POLICE HQ',
 
+    liveTag:'STREAM STATUS',
+    liveNowLab:'LIVE NOW', offlineLab:'OFFLINE',
+    liveOfflineTitle:'Currently Offline',
+    liveOfflineSub:'The stream is off right now. Follow on Kick so you never miss a go-live.',
+    viewersLab:'viewers',
+    autoRefresh:'Auto-refresh every 60s',
+    refreshNow:'Refresh now',
+    liveLoading:'Checking live status...',
+
     chTitleA:'EVERY CHANNEL.',
     chTitleB:'ONE COMMAND.',
     chSub:'Pick your platform. The patrol never ends.',
@@ -78,6 +87,15 @@ const I18N = {
     dutyTitle:'قائد القسم',
     dutyBody:'قدّام الطابور مع القسم كله. ابو ادم ماسك قطاع الشرطة في لاست تشانس، بيقود كل بريفينج وكل باترول وكل بلاغ في الشارع.',
     dutyCaption:'لاست تشانس · مقر الشرطة',
+
+    liveTag:'حالة البث',
+    liveNowLab:'لايف دلوقتي', offlineLab:'مش لايف',
+    liveOfflineTitle:'مش لايف دلوقتي',
+    liveOfflineSub:'البث مقفول حالياً. تابِع على Kick علشان عمرك ما تفوّت لايف.',
+    viewersLab:'مشاهد',
+    autoRefresh:'بيتحدّث كل 60 ثانية',
+    refreshNow:'حدّث دلوقتي',
+    liveLoading:'بنتأكد من حالة البث...',
 
     chTitleA:'كل القنوات،',
     chTitleB:'تحت أمر واحد.',

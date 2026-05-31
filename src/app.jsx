@@ -8,9 +8,17 @@ function shade(hex,p){ const h=hex.replace('#',''); const n=parseInt(h.length===
 function App(){
   const [tw,setTw]=useState(window.TWEAKS_DEFAULT);
   const [panel,setPanel]=useState(false);
-  const [isLive,setLive]=useState(false);
+  const [liveData,setLiveData]=useState(null);
+  const [refreshing,setRefreshing]=useState(false);
+  const isLive=!!(liveData&&liveData.isLive);
 
   const set=(k,v)=>setTw(p=>({...p,[k]:v}));
+
+  const refreshLive=React.useCallback(async()=>{
+    setRefreshing(true);
+    try{ const r=await fetch('/api/live',{cache:'no-store'}); if(r.ok){ const d=await r.json(); if(d&&typeof d.isLive==='boolean') setLiveData(d); } }catch(_){}
+    setRefreshing(false);
+  },[]);
 
   useEffect(()=>{
     const r=document.documentElement;
@@ -26,11 +34,7 @@ function App(){
     window.__sfx?.(tw.sound);
   },[tw]);
 
-  useEffect(()=>{
-    let dead=false;
-    const ping=async()=>{ try{ const r=await fetch('/api/live',{cache:'no-store'}); if(!r.ok)return; const d=await r.json(); if(!dead && typeof d.isLive==='boolean') setLive(d.isLive);}catch(_){} };
-    ping(); const id=setInterval(ping,60000); return ()=>{dead=true;clearInterval(id);};
-  },[]);
+  useEffect(()=>{ refreshLive(); const id=setInterval(refreshLive,60000); return ()=>clearInterval(id); },[refreshLive]);
 
   useEffect(()=>{ setTimeout(()=>window.__reveal?.(),80); },[tw.lang]);
 
@@ -39,6 +43,7 @@ function App(){
     <LangContext.Provider value={{lang:tw.lang,t}}>
       <Nav isLive={isLive} lang={tw.lang} setLang={v=>set('lang',v)} onCustomize={()=>setPanel(o=>!o)}/>
       <Hero isLive={isLive}/>
+      <LiveNow data={liveData} refreshing={refreshing} onRefresh={refreshLive}/>
       <OnDuty/>
       <Channels/>
       <About/>

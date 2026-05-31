@@ -22,6 +22,7 @@ const TIKTOK_USER = 'ABUADAMZ';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
 // --- Kick: clean JSON API. `livestream` is an object while live, null while offline.
+// Returns rich info: { live, title, viewers, category }. live === null => unknown.
 async function checkKick() {
   try {
     const r = await fetch(`https://kick.com/api/v2/channels/${KICK_USER}`, {
@@ -33,15 +34,22 @@ async function checkKick() {
       },
       cache: 'no-store',
     });
-    if (!r.ok) return null;
+    if (!r.ok) return { live: null };
     const d = await r.json();
-    if (d && d.livestream) {
-      if (typeof d.livestream.is_live === 'boolean') return d.livestream.is_live;
-      return true;
+    const ls = d && d.livestream;
+    if (ls) {
+      const live = (typeof ls.is_live === 'boolean') ? ls.is_live : true;
+      const cat = ls.categories && ls.categories[0] && ls.categories[0].name;
+      return {
+        live,
+        title: (ls.session_title || '').trim(),
+        viewers: (typeof ls.viewer_count === 'number') ? ls.viewer_count : null,
+        category: cat || '',
+      };
     }
-    return false;
+    return { live: false };
   } catch {
-    return null;
+    return { live: null };
   }
 }
 
@@ -86,11 +94,23 @@ export default async function handler() {
 
   let isLive = false;
   let platform = 'kick';
-  if (kick === true)         { isLive = true; platform = 'kick';    }
+  if (kick.live === true)    { isLive = true; platform = 'kick';    }
   else if (youtube === true) { isLive = true; platform = 'youtube'; }
   else if (tiktok === true)  { isLive = true; platform = 'tiktok';  }
 
-  return new Response(JSON.stringify({ isLive, platform, debug: { kick, youtube, tiktok } }), {
+  const body = {
+    isLive,
+    platform,
+    kick: {
+      live: kick.live === true,
+      title: kick.title || '',
+      viewers: (typeof kick.viewers === 'number') ? kick.viewers : null,
+      category: kick.category || '',
+    },
+    debug: { kick: kick.live, youtube, tiktok },
+  };
+
+  return new Response(JSON.stringify(body), {
     status: 200,
     headers: {
       'content-type': 'application/json; charset=utf-8',

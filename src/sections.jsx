@@ -126,6 +126,67 @@ function OnDuty() {
   );
 }
 
+/* ---------------- LIVE NOW (Kick status banner) ---------------- */
+function LiveNow({ data, refreshing, onRefresh }) {
+  const { t } = useContext(LangContext);
+  const KICK = `https://kick.com/${KICK_USER}`;
+  const k = data && data.kick;
+  const live = !!(k && k.live);
+  const fmtNum = (n)=> (typeof n==='number') ? n.toLocaleString('en-US') : null;
+  const title = (k && k.title) ? k.title : '';
+  const viewers = k ? fmtNum(k.viewers) : null;
+  const category = (k && k.category) ? k.category : '';
+
+  return (
+    <section className="sec live" id="live">
+      <div className="app-pad">
+        <div className={`liveband rv rv-s ${live?'is-live':'is-off'}`} data-tilt="3">
+          <span className="liveband__bg" aria-hidden="true"></span>
+          <div className="liveband__top">
+            <span className={`livestat ${live?'on':''}`}>
+              <span className="livestat__dots"><i></i><i></i></span>
+              {live ? t.liveNowLab : t.offlineLab}
+            </span>
+            <a className="liveband__url" href={KICK} target="_blank" rel="noopener noreferrer"
+               onMouseEnter={()=>window.__hover?.()}>kick.com/{KICK_USER}</a>
+          </div>
+
+          <div className="liveband__body">
+            {!data
+              ? <div className="liveband__title liveband__title--dim">{t.liveLoading}</div>
+              : live
+                ? <div className="liveband__title">{title || `${t.liveNowLab} · ${KICK_USER}`}</div>
+                : <div className="liveband__off">
+                    <div className="liveband__title">{t.liveOfflineTitle}</div>
+                    <p className="liveband__sub">{t.liveOfflineSub}</p>
+                  </div>}
+
+            {live && (viewers || category) &&
+              <div className="liveband__meta">
+                {viewers && <span className="livepill2"><Icon.Eye/><b>{viewers}</b><span>{t.viewersLab}</span></span>}
+                {category && <span className="livepill2"><Icon.Monitor/><span>{category}</span></span>}
+              </div>}
+          </div>
+
+          <div className="liveband__foot">
+            <a className="btn btn-primary liveband__cta" href={KICK} target="_blank" rel="noopener noreferrer"
+               data-kpv onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
+              <Icon.Kick/><span>{t.heroWatch}</span><Icon.Ext/>
+            </a>
+            <div className="liveband__refresh">
+              <span className="liveband__auto">{t.autoRefresh}</span>
+              <button className={`refreshbtn ${refreshing?'spin':''}`} onClick={()=>{ onRefresh&&onRefresh(); window.__click?.(); }}
+                 onMouseEnter={()=>window.__hover?.()} aria-label={t.refreshNow}>
+                <Icon.Refresh/><span>{t.refreshNow}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- CHANNEL HUB ---------------- */
 function Channels() {
   const { t } = useContext(LangContext);
@@ -273,4 +334,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Logo, Hero, OnDuty, Channels, About, Community, Footer });
+Object.assign(window, { Logo, Hero, OnDuty, LiveNow, Channels, About, Community, Footer });
