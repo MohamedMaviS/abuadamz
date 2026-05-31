@@ -33,8 +33,8 @@ const Icon = {
     </svg>
   ),
   Kick: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M4 4h5v5h2V7h2V5h2V4h5v6h-2v2h-2v2h2v2h2v6h-5v-2h-2v-2h-2v-2H9v6H4V4z"/>
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path d="M0 0h8v8h4V4h4V0h8v12h-4v4h4v12h-8v-4h-4v-4H8v8H0V0z"/>
     </svg>
   ),
   Crown: () => (
