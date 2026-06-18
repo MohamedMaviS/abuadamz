@@ -38,7 +38,7 @@ const I18N = {
     chTitleA:'EVERY CHANNEL.',
     chTitleB:'ONE COMMAND.',
     chSub:'Pick your platform. The patrol never ends.',
-    act:{ kick:'Watch live', youtube:'Subscribe', tiktok:'Follow', instagram:'Follow', x:'Follow', discord:'Join server', whatsapp:'Join channel' },
+    act:{ kick:'Watch live', youtube:'Subscribe', tiktok:'Follow', instagram:'Follow', x:'Follow', discord:'Join server', snapchat:'Add', whatsapp:'Join channel' },
 
     aboutTag:'WHO IS',
     aboutTitle:'ABU ADAMZ',
@@ -102,7 +102,7 @@ const I18N = {
     chTitleA:'كل القنوات،',
     chTitleB:'تحت أمر واحد.',
     chSub:'اختار منصتك، والباترول مبيوقفش.',
-    act:{ kick:'شوف اللايف', youtube:'اشترك', tiktok:'تابِع', instagram:'تابِع', x:'تابِع', discord:'ادخل السيرفر', whatsapp:'ادخل القناة' },
+    act:{ kick:'شوف اللايف', youtube:'اشترك', tiktok:'تابِع', instagram:'تابِع', x:'تابِع', discord:'ادخل السيرفر', snapchat:'أضِفه', whatsapp:'ادخل القناة' },
 
     aboutTag:'مين هو',
     aboutTitle:'ابو ادم',

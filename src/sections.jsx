@@ -8,6 +8,7 @@ const CHANNELS = [
   { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e1306c', icon:'Instagram' },
   { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#ffffff', icon:'X' },
   { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#5865f2', icon:'Discord' },
+  { key:'snapchat',  name:'SNAPCHAT',  handle:'@abu_adamz',           url:'https://www.snapchat.com/add/abu_adamz',                      color:'#fffc00', icon:'Snapchat' },
   { key:'whatsapp',  name:'WHATSAPP',  handle:'Official channel',     url:'https://www.whatsapp.com/channel/0029Vb6dID43AzNXS9Dx4X06',   color:'#25d366', icon:'WhatsApp' },
 ];
 
