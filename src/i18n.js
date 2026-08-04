@@ -7,14 +7,14 @@ const I18N = {
 
     heroKicker:'STREAMER · POLICE RP COMMANDER · GTA',
     heroName:'ABU ADAMZ',
-    heroSub:'CHIEF OF POLICE · LAST CHANCE RP',
-    heroTagline:'Veteran on the scene, live on Kick. Role-playing since 2019, and currently Chief of Police in Last Chance. Long patrols, real authority, and a community that rides every night.',
+    heroSub:'CHIEF OF POLICE · GTA RP',
+    heroTagline:'Veteran on the scene, live on Kick. Role-playing since 2019, and currently Chief of Police. Long patrols, real authority, and a community that rides every night.',
     heroWatch:'Watch on Kick',
     heroChannels:'All Channels',
     heroRotate:[
       'Veteran on the scene · live on Kick',
       'Role-playing since 2019',
-      'Currently Chief of Police in Last Chance',
+      'Currently Chief of Police',
       'Long patrols · real authority',
       'A community that rides every night',
     ],
@@ -22,8 +22,8 @@ const I18N = {
 
     dutyTag:'ON DUTY',
     dutyTitle:'LEADING THE PRECINCT',
-    dutyBody:'Front and center with the whole department. Abu Adamz runs the precinct in Last Chance, leading every briefing, every patrol, and every call on the streets.',
-    dutyCaption:'LAST CHANCE · POLICE HQ',
+    dutyBody:'Front and center with the whole department. Abu Adamz runs the precinct, leading every briefing, every patrol, and every call on the streets.',
+    dutyCaption:'POLICE HQ · ON PATROL',
 
     liveTag:'STREAM STATUS',
     liveNowLab:'LIVE NOW', offlineLab:'OFFLINE',
@@ -42,15 +42,15 @@ const I18N = {
 
     aboutTag:'WHO IS',
     aboutTitle:'ABU ADAMZ',
-    aboutBody:'Mohamed Ahmed, known to everyone as Abu Adam. A veteran of the scene at 45, gaming has been his life for years. He has been deep in police role-play since 2019, and today he runs the streets as Chief of Police in the city of Last Chance. Long patrols, real authority, and a community that rides with him every night.',
+    aboutBody:'Mohamed Ahmed, known to everyone as Abu Adam. A veteran of the scene at 45, gaming has been his life for years. He has been deep in police role-play since 2019, and today he runs the streets as Chief of Police. Long patrols, real authority, and a community that rides with him every night.',
     creds:[
-      { v:'45',          l:'YEARS OLD' },
-      { v:'2019',        l:'ON PATROL SINCE' },
-      { v:'CHIEF',       l:'OF POLICE' },
-      { v:'LAST CHANCE', l:'RP CITY' },
+      { v:'45',    l:'YEARS OLD' },
+      { v:'2019',  l:'ON PATROL SINCE' },
+      { v:'CHIEF', l:'OF POLICE' },
+      { v:'KICK',  l:'LIVE ON' },
     ],
-    tags:['POLICE RP','GTA','LAST CHANCE','ROLE-PLAY','VETERAN','SINCE 2019'],
-    marquee:['ABU ADAMZ','POLICE CHIEF','LAST CHANCE RP','SINCE 2019','GTA RP','VETERAN','KICK'],
+    tags:['POLICE RP','GTA','CHIEF OF POLICE','ROLE-PLAY','VETERAN','SINCE 2019'],
+    marquee:['ABU ADAMZ','POLICE CHIEF','ON PATROL','SINCE 2019','GTA RP','VETERAN','KICK'],
 
     commTag:'THE PRECINCT',
     commTitle:'JOIN THE COMMUNITY',
@@ -71,14 +71,14 @@ const I18N = {
 
     heroKicker:'ستريمر · قائد شرطة رول بلاي · جاتا',
     heroName:'ABU ADAMZ',
-    heroSub:'مدير الشرطة · لاست تشانس رول بلاي',
-    heroTagline:'راجل محترف في المجال، لايف على Kick. بيلعب رول بلاي من 2019، ودلوقتي ماسك قطاع الشرطة في لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة معاه كل ليلة.',
+    heroSub:'قائد الشرطة · جاتا رول بلاي',
+    heroTagline:'راجل محترف في المجال، لايف على Kick. بيلعب رول بلاي من 2019، ودلوقتي قائد الشرطة وماسك القطاع كله. باترولات طويلة، هيبة حقيقية، وعيلة واقفة معاه كل ليلة.',
     heroWatch:'شوفني على Kick',
     heroChannels:'كل القنوات',
     heroRotate:[
       'راجل محترف · لايف على Kick',
       'بيلعب رول بلاي من 2019',
-      'دلوقتي مدير الشرطة في لاست تشانس',
+      'دلوقتي قائد الشرطة',
       'باترولات طويلة · هيبة حقيقية',
       'وعيلة واقفة معاه كل ليلة',
     ],
@@ -86,8 +86,8 @@ const I18N = {
 
     dutyTag:'في الخدمة',
     dutyTitle:'قائد القسم',
-    dutyBody:'قدّام الطابور مع القسم كله. ابو ادم ماسك قطاع الشرطة في لاست تشانس، بيقود كل بريفينج وكل باترول وكل بلاغ في الشارع.',
-    dutyCaption:'لاست تشانس · مقر الشرطة',
+    dutyBody:'قدّام الطابور مع القسم كله. ابو ادم قائد الشرطة وماسك القطاع كله، بيقود كل بريفينج وكل باترول وكل بلاغ في الشارع.',
+    dutyCaption:'مقر الشرطة · في الباترول',
 
     liveTag:'حالة البث',
     liveNowLab:'لايف دلوقتي', offlineLab:'مش لايف',
@@ -106,15 +106,15 @@ const I18N = {
 
     aboutTag:'مين هو',
     aboutTitle:'ابو ادم',
-    aboutBody:'محمد أحمد، اللي الكل يعرفه باسم ابو ادم. راجل محترم وابن 45 سنة، والجيمنج حياته من زمان. بيلعب رول بلاي الشرطة من 2019، ودلوقتي ماسك قطاع الشرطة في مدينة لاست تشانس. باترولات طويلة، هيبة حقيقية، وعيلة واقفة جنبه كل ليلة.',
+    aboutBody:'محمد أحمد، اللي الكل يعرفه باسم ابو ادم. راجل محترم وابن 45 سنة، والجيمنج حياته من زمان. بيلعب رول بلاي الشرطة من 2019، ودلوقتي قائد الشرطة وماسك القطاع كله. باترولات طويلة، هيبة حقيقية، وعيلة واقفة جنبه كل ليلة.',
     creds:[
-      { v:'45',          l:'سنة' },
-      { v:'2019',        l:'في الخدمة من' },
-      { v:'القائد',      l:'مدير الشرطة' },
-      { v:'لاست تشانس',  l:'مدينة الرول بلاي' },
+      { v:'45',     l:'سنة' },
+      { v:'2019',   l:'في الخدمة من' },
+      { v:'قائد',   l:'الشرطة' },
+      { v:'كيك',    l:'لايف على' },
     ],
-    tags:['شرطة رول بلاي','جاتا','لاست تشانس','رول بلاي','محترف','من 2019'],
-    marquee:['ابو ادم','مدير الشرطة','لاست تشانس','من 2019','جاتا رول بلاي','محترف','كيك'],
+    tags:['شرطة رول بلاي','جاتا','قائد الشرطة','رول بلاي','محترف','من 2019'],
+    marquee:['ابو ادم','قائد الشرطة','في الباترول','من 2019','جاتا رول بلاي','محترف','كيك'],
 
     commTag:'القسم',
     commTitle:'انضم لعيلة ابو ادم',

@@ -164,7 +164,6 @@ function MusicPlayer(){
   const [cur, setCur]       = React.useState(0);
   const [dur, setDur]       = React.useState(0);
   const audioRef  = React.useRef(null);
-  const startedRef= React.useRef(false);
 
   React.useEffect(()=>{
     const a = audioRef.current; if(!a) return;
@@ -181,19 +180,7 @@ function MusicPlayer(){
   React.useEffect(()=>{ const a=audioRef.current; if(!a) return; if(playing){ a.play().catch(()=>setPlaying(false)); } else { a.pause(); } },[playing]);
   React.useEffect(()=>{ const a=audioRef.current; if(!a) return; a.volume=vol; a.muted=muted; },[vol,muted]);
 
-  /* Auto-start on first interaction (click / scroll / key / touch). */
-  React.useEffect(()=>{
-    const events = ['pointerdown','click','touchstart','keydown','wheel','scroll'];
-    const start = ()=>{
-      if(startedRef.current) return;
-      startedRef.current = true;
-      const a = audioRef.current;
-      if(a){ const p=a.play(); if(p&&p.then) p.then(()=>setPlaying(true)).catch(()=>{ startedRef.current=false; }); else setPlaying(true); }
-      events.forEach(e=>window.removeEventListener(e, start, true));
-    };
-    events.forEach(e=>window.addEventListener(e, start, true));
-    return ()=>events.forEach(e=>window.removeEventListener(e, start, true));
-  },[]);
+  /* No auto-start: playback only begins when the user hits play. */
 
   const seekTo = (e)=>{ const a=audioRef.current; if(!a||!dur) return; const r=e.currentTarget.getBoundingClientRect(); let x=(e.clientX-r.left)/r.width; x=Math.max(0,Math.min(1,x)); a.currentTime=x*dur; setCur(a.currentTime); };
   const pick = (i)=>{ setIdx(i); setPlaying(true); window.__click?.(); };
