@@ -16,8 +16,10 @@ function App(){
 
   const refreshLive=React.useCallback(async()=>{
     setRefreshing(true);
-    try{ const r=await fetch('/api/live',{cache:'no-store'}); if(r.ok){ const d=await r.json(); if(d&&typeof d.isLive==='boolean') setLiveData(d); } }catch(_){}
+    let ok=false;
+    try{ const r=await fetch('/api/live',{cache:'no-store'}); if(r.ok){ const d=await r.json(); if(d&&typeof d.isLive==='boolean'){ setLiveData(d); ok=true; } } }catch(_){}
     setRefreshing(false);
+    return ok;
   },[]);
 
   useEffect(()=>{
@@ -34,7 +36,23 @@ function App(){
     window.__sfx?.(tw.sound);
   },[tw]);
 
-  useEffect(()=>{ refreshLive(); const id=setInterval(refreshLive,60000); return ()=>clearInterval(id); },[refreshLive]);
+  useEffect(()=>{
+    let id=null;
+    let lastSuccess=0;
+    const run=async()=>{ if(await refreshLive()) lastSuccess=Date.now(); };
+    const start=()=>{ if(!id) id=setInterval(run,60000); };
+    const stop=()=>{ if(id){ clearInterval(id); id=null; } };
+    const onVis=()=>{
+      if(document.visibilityState==='visible'){
+        if(Date.now()-lastSuccess>=60000) run();
+        start();
+      }else{ stop(); }
+    };
+    run();
+    if(document.visibilityState==='visible') start();
+    document.addEventListener('visibilitychange',onVis);
+    return ()=>{ stop(); document.removeEventListener('visibilitychange',onVis); };
+  },[refreshLive]);
 
   useEffect(()=>{ setTimeout(()=>window.__reveal?.(),80); },[tw.lang]);
 
