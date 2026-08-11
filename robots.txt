@@ -21,4 +21,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://abuadamz.vercel.app/sitemap.xml
+Sitemap: https://abuadamz.pages.dev/sitemap.xml
