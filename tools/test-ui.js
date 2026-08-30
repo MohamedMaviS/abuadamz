@@ -33,7 +33,6 @@ for (const file of [
   vm.runInContext(fs.readFileSync(file, 'utf8'), context, { filename: file });
 }
 
-const UpcomingStream = vm.runInContext('UpcomingStream', context);
 const Clips = vm.runInContext('Clips', context);
 const LangContext = vm.runInContext('LangContext', context);
 const I18N = sandbox.window.I18N;
@@ -48,15 +47,14 @@ function render(Component, lang) {
   );
 }
 
-const upcomingArabic = render(UpcomingStream, 'ar');
-assert.match(upcomingArabic, /باترولات الليل/);
-assert.match(upcomingArabic, /غالبًا لايف بالليل/);
-assert.match(upcomingArabic, /https:\/\/kick\.com\/abu_adamz/);
-
 const clipsEnglish = render(Clips, 'en');
-assert.match(clipsEnglish, /Kick Clips/);
-assert.match(clipsEnglish, /TikTok Highlights/);
+assert.match(clipsEnglish, /KICK · MOST VIEWED/);
+assert.match(clipsEnglish, /LATEST ON TIKTOK/);
+assert.match(clipsEnglish, /tiktok-embed/);
 assert.match(clipsEnglish, /https:\/\/kick\.com\/abu_adamz\/clips/);
-assert.match(clipsEnglish, /https:\/\/www\.tiktok\.com\/@ABUADAMZ/);
+assert.match(clipsEnglish, /https:\/\/www\.tiktok\.com\/@abuadamz/);
+
+const compiledSections = fs.readFileSync(findFile(/^sections\.[a-f0-9]{12}\.js$/), 'utf8');
+assert.doesNotMatch(compiledSections, /UpcomingStream|NIGHT PATROLS|باترولات الليل/);
 
 console.log('UI render tests: OK');

@@ -67,6 +67,60 @@ async function testLiveFunction() {
   assert.equal(response.status, 405);
 }
 
+async function testClipsFunction() {
+  let upstreamUrl = '';
+  const onRequest = loadFunction('functions/api/clips.js', {
+    fetch: async (url) => {
+      upstreamUrl = String(url);
+      return new Response(JSON.stringify({
+        clips: [
+          {
+            id: 'clip_TOP123',
+            title: 'Top patrol',
+            thumbnail_url: 'https://clips.kick.com/clips/top/thumbnail.webp',
+            views: 2034,
+            likes: 18,
+            duration: 49,
+            created_at: '2026-08-29T22:00:00Z',
+            privacy: 'public',
+          },
+          {
+            id: 'clip_PRIVATE123',
+            title: 'Hidden',
+            thumbnail_url: 'https://clips.kick.com/clips/private/thumbnail.webp',
+            views: 9000,
+            privacy: 'private',
+          },
+        ],
+        nextCursor: { view:47, id:'clip_NEXT123' },
+      }), { status:200 });
+    },
+  });
+
+  let response = await onRequest({ request:new Request('https://example.test/api/clips') });
+  let body = await readJson(response);
+  assert.equal(response.status, 200);
+  assert.equal(body.sort, 'views');
+  assert.equal(body.clips.length, 1);
+  assert.equal(body.clips[0].views, 2034);
+  assert.equal(body.clips[0].url, 'https://kick.com/abu_adamz/clips/clip_TOP123');
+  assert.equal(body.nextCursor, '{"view":47,"id":"clip_NEXT123"}');
+  assert.match(upstreamUrl, /sort=view/);
+  assert.match(upstreamUrl, /time=all/);
+
+  response = await onRequest({ request:new Request('https://example.test/api/clips?cursor=bad') });
+  assert.equal(response.status, 400);
+
+  response = await onRequest({ request:new Request('https://example.test/api/clips', { method:'POST' }) });
+  assert.equal(response.status, 405);
+
+  const unavailable = loadFunction('functions/api/clips.js', {
+    fetch: async () => { throw new Error('upstream unavailable'); },
+  });
+  response = await unavailable({ request:new Request('https://example.test/api/clips') });
+  assert.equal(response.status, 503);
+}
+
 async function testMediaFunction() {
   const bytes = Uint8Array.from({ length: 100 }, (_, index) => index);
   const onRequest = loadFunction('functions/media/[file].js');
@@ -100,6 +154,6 @@ async function testMediaFunction() {
   assert.equal(response.status, 404);
 }
 
-Promise.all([testLiveFunction(), testMediaFunction()])
+Promise.all([testLiveFunction(), testClipsFunction(), testMediaFunction()])
   .then(() => console.log('function tests: OK'))
   .catch((error) => { console.error(error); process.exit(1); });

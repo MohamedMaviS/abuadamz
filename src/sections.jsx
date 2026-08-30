@@ -4,7 +4,7 @@ const KICK_USER = 'abu_adamz';
 const CHANNELS = [
   { key:'kick',      name:'KICK',      handle:'kick.com/abu_adamz',   url:'https://kick.com/abu_adamz',                                  color:'#53fc18', icon:'Kick' },
   { key:'youtube',   name:'YOUTUBE',   handle:'@ABU_ADAMZ',           url:'https://www.youtube.com/@ABU_ADAMZ',                          color:'#ff0033', icon:'YouTube' },
-  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@ABUADAMZ',                            color:'#25f4ee', icon:'TikTok' },
+  { key:'tiktok',    name:'TIKTOK',    handle:'@ABUADAMZ',            url:'https://www.tiktok.com/@abuadamz',                            color:'#25f4ee', icon:'TikTok' },
   { key:'instagram', name:'INSTAGRAM', handle:'@ABU_ADAMZ1',          url:'https://www.instagram.com/ABU_ADAMZ1',                        color:'#e1306c', icon:'Instagram' },
   { key:'x',         name:'X',         handle:'@abu_adaamz',          url:'https://x.com/abu_adaamz',                                    color:'#ffffff', icon:'X' },
   { key:'discord',   name:'DISCORD',   handle:'discord.gg/yAjdhappZQ',url:'https://discord.com/invite/yAjdhappZQ',                       color:'#5865f2', icon:'Discord' },
@@ -261,103 +261,174 @@ function LiveNow({ data, unknown, refreshing, onRefresh }) {
   );
 }
 
-/* ---------------- OPTIONAL UPCOMING STREAM ---------------- */
-function UpcomingStream() {
-  const { lang, t } = useContext(LangContext);
-  const schedule = window.SITE_CONTENT && window.SITE_CONTENT.nextStream;
-  const startsAt = Date.parse(schedule && schedule.startsAt ? schedule.startsAt : '');
-  const exactSchedule = Number.isFinite(startsAt);
-  const flexibleSchedule = schedule && schedule.mode === 'flexible';
-  const [now, setNow] = React.useState(Date.now());
-
-  React.useEffect(() => {
-    if (!exactSchedule) return undefined;
-    const id = setInterval(() => setNow(Date.now()), 30000);
-    return () => clearInterval(id);
-  }, [exactSchedule, startsAt]);
-
-  if (!exactSchedule && !flexibleSchedule) return null;
-
-  const remaining = exactSchedule ? Math.max(0, startsAt - now) : 0;
-  const totalMinutes = Math.floor(remaining / 60000);
-  const counting = totalMinutes > 0;
-  const values = [
-    { value: Math.floor(totalMinutes / 1440), label: t.scheduleDays },
-    { value: Math.floor((totalMinutes % 1440) / 60), label: t.scheduleHours },
-    { value: totalMinutes % 60, label: t.scheduleMinutes },
-  ];
-  let dateLabel = t.scheduleFlexibleSub;
-  if (exactSchedule) {
-    const options = { dateStyle:'full', timeStyle:'short' };
-    if (schedule.timeZone) options.timeZone = schedule.timeZone;
-    try {
-      dateLabel = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', options).format(new Date(startsAt));
-    } catch (_) {
-      dateLabel = new Date(startsAt).toLocaleString();
-    }
+/* ---------------- AUTO-UPDATING CLIPS ---------------- */
+function compactNumber(value, lang) {
+  try {
+    return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en', {
+      notation:'compact', maximumFractionDigits:1,
+    }).format(Number(value) || 0);
+  } catch (_) {
+    return String(Number(value) || 0);
   }
-  const title = localized(schedule.title, lang) || (flexibleSchedule ? t.scheduleFlexibleTitle : t.scheduleTitle);
-  const url = schedule.url || `https://kick.com/${KICK_USER}`;
-
-  return (
-    <section className="sec schedule" id="schedule">
-      <div className="app-pad">
-        <div className="schedule__card rv rv-s">
-          <div className="schedule__copy">
-            <div className="tag"><span className="tag__star"><Icon.Live/></span>{t.scheduleTag}</div>
-            <h2>{title}</h2>
-            <p>{dateLabel}</p>
-          </div>
-          <div className="schedule__side">
-            <span className="schedule__label">{flexibleSchedule ? t.scheduleFlexibleBadge : (counting ? t.scheduleStarts : t.scheduleSoon)}</span>
-            {counting && <div className="schedule__count" dir="ltr">
-              {values.map(item => (
-                <span className="schedule__unit" key={item.label}>
-                  <b>{String(item.value).padStart(2, '0')}</b><small>{item.label}</small>
-                </span>
-              ))}
-            </div>}
-            <a className="btn btn-primary" href={url} target="_blank" rel="noopener noreferrer"
-              onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
-              <Icon.Kick/><span>{t.scheduleCta}</span><Icon.Ext/>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
 }
 
-/* ---------------- OPTIONAL CLIPS ---------------- */
+function clipDuration(value) {
+  const seconds = Math.max(0, Number(value) || 0);
+  return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+}
+
 function Clips() {
   const { lang, t } = useContext(LangContext);
-  const clips = Array.isArray(window.SITE_CONTENT && window.SITE_CONTENT.clips)
-    ? window.SITE_CONTENT.clips.filter(clip => clip && clip.url)
-    : [];
-  if (!clips.length) return null;
+  const [clips, setClips] = React.useState([]);
+  const [nextCursor, setNextCursor] = React.useState('');
+  const [status, setStatus] = React.useState('loading');
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  const railRef = React.useRef(null);
+  const sentinelRef = React.useRef(null);
+
+  const refresh = React.useCallback(async () => {
+    setStatus(current => current === 'ready' ? current : 'loading');
+    try {
+      const response = await fetch('/api/clips', { cache:'no-store' });
+      if (!response.ok) throw new Error(`clips-${response.status}`);
+      const data = await response.json();
+      const incoming = Array.isArray(data.clips) ? data.clips : [];
+      setClips(incoming);
+      setNextCursor(typeof data.nextCursor === 'string' ? data.nextCursor : '');
+      setStatus('ready');
+    } catch (_) {
+      setStatus(current => current === 'ready' ? current : 'error');
+    }
+  }, []);
+
+  const loadMore = React.useCallback(async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(`/api/clips?cursor=${encodeURIComponent(nextCursor)}`, { cache:'no-store' });
+      if (!response.ok) throw new Error(`clips-${response.status}`);
+      const data = await response.json();
+      const incoming = Array.isArray(data.clips) ? data.clips : [];
+      setClips(current => {
+        const seen = new Set(current.map(clip => clip.id));
+        return current.concat(incoming.filter(clip => !seen.has(clip.id)));
+      });
+      setNextCursor(typeof data.nextCursor === 'string' ? data.nextCursor : '');
+    } catch (_) {
+      // Stop automatic retries if Kick pagination is temporarily unavailable.
+      setNextCursor('');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [nextCursor, loadingMore]);
+
+  React.useEffect(() => {
+    refresh();
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') refresh();
+    }, 600000);
+    return () => clearInterval(id);
+  }, [refresh]);
+
+  React.useEffect(() => {
+    const root = railRef.current;
+    const target = sentinelRef.current;
+    if (!root || !target || !nextCursor || loadingMore || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) loadMore();
+    }, { root, rootMargin:'0px 420px' });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [nextCursor, loadingMore, loadMore]);
+
+  React.useEffect(() => {
+    const scriptId = 'tiktok-creator-embed';
+    const render = () => window.tiktokEmbed?.lib?.render?.();
+    const existing = document.getElementById(scriptId);
+    if (existing) {
+      render();
+      return undefined;
+    }
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = 'https://www.tiktok.com/embed.js';
+    script.async = true;
+    script.onload = render;
+    document.body.appendChild(script);
+    return undefined;
+  }, []);
+
+  const scrollRail = direction => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const amount = Math.max(280, rail.clientWidth * .82);
+    const rtlFactor = lang === 'ar' ? -1 : 1;
+    rail.scrollBy({ left:direction * amount * rtlFactor, behavior:'smooth' });
+    window.__click?.();
+  };
 
   return (
     <section className="sec clips" id="clips">
       <div className="app-pad">
         <SecHead tag={t.clipsTag} icon="Play">{t.clipsTitle}</SecHead>
         <p className="lead rv clips__sub">{t.clipsSub}</p>
-        <div className="clips__grid">
-          {clips.map((clip, index) => {
-            const title = localized(clip.title, lang) || `${t.clipsTitle} ${index + 1}`;
-            const PlatformIcon = clip.platform === 'tiktok' ? Icon.TikTok : Icon.Kick;
-            return (
-              <a className="clip rv" key={clip.url} href={clip.url} target="_blank" rel="noopener noreferrer"
+
+        <div className="clip-shelf rv">
+          <div className="clip-shelf__head">
+            <div className="clip-shelf__title">
+              <span className="clip-shelf__icon clip-shelf__icon--kick"><Icon.Kick/></span>
+              <span><b>{t.clipsKickTitle}</b><small>{t.clipsKickSub}</small></span>
+            </div>
+            <div className="clip-shelf__actions">
+              <span className="auto-badge"><i></i>{t.clipsAuto}</span>
+              <button onClick={()=>scrollRail(-1)} aria-label={t.clipsPrevious}><Icon.Arrow/></button>
+              <button onClick={()=>scrollRail(1)} aria-label={t.clipsNext}><Icon.Arrow/></button>
+            </div>
+          </div>
+
+          {status === 'loading' && <div className="clips__state"><span className="clips__spinner"></span>{t.clipsLoading}</div>}
+          {status === 'error' && <div className="clips__state clips__state--error">
+            <span>{t.clipsError}</span><button onClick={refresh}>{t.clipsRetry}</button>
+          </div>}
+          {clips.length > 0 && <div className="clips__rail" ref={railRef} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            {clips.map((clip, index) => (
+              <a className="clip" key={clip.id} href={clip.url} target="_blank" rel="noopener noreferrer"
                 onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
                 <span className="clip__media">
-                  {clip.thumbnail
-                    ? <img src={clip.thumbnail} alt="" loading="lazy" decoding="async"/>
-                    : <span className="clip__fallback clip__platform"><PlatformIcon/></span>}
+                  <img src={clip.thumbnail} alt="" loading="lazy" decoding="async"/>
+                  <span className="clip__rank">#{index + 1}</span>
+                  <span className="clip__duration" dir="ltr">{clipDuration(clip.duration)}</span>
                   <span className="clip__play"><Icon.Play/></span>
                 </span>
-                <span className="clip__body"><b>{title}</b><small>{t.clipWatch}<Icon.Ext/></small></span>
+                <span className="clip__body">
+                  <b>{clip.title || `${t.clipsTitle} ${index + 1}`}</b>
+                  <span className="clip__meta"><small><Icon.Eye/>{compactNumber(clip.views, lang)} {t.clipViews}</small><small>{t.clipWatch}<Icon.Ext/></small></span>
+                </span>
               </a>
-            );
-          })}
+            ))}
+            <span className="clips__sentinel" ref={sentinelRef} aria-hidden="true">
+              {loadingMore && <span className="clips__spinner"></span>}
+            </span>
+          </div>}
+          <a className="clips__all" href={`https://kick.com/${KICK_USER}/clips`} target="_blank" rel="noopener noreferrer">
+            {t.clipsAllKick}<Icon.Ext/>
+          </a>
+        </div>
+
+        <div className="tiktok-showcase rv">
+          <div className="clip-shelf__head">
+            <div className="clip-shelf__title">
+              <span className="clip-shelf__icon clip-shelf__icon--tiktok"><Icon.TikTok/></span>
+              <span><b>{t.clipsTikTokTitle}</b><small>{t.clipsTikTokSub}</small></span>
+            </div>
+            <span className="auto-badge"><i></i>{t.clipsAuto}</span>
+          </div>
+          <div className="tiktok-showcase__embed" dir="ltr">
+            <blockquote className="tiktok-embed" cite="https://www.tiktok.com/@abuadamz"
+              data-unique-id="abuadamz" data-embed-type="creator">
+              <section><a target="_blank" rel="noopener noreferrer" href="https://www.tiktok.com/@abuadamz?refer=creator_embed">@ABUADAMZ</a></section>
+            </blockquote>
+          </div>
         </div>
       </div>
     </section>
@@ -511,4 +582,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Logo, Hero, OnDuty, LiveNow, UpcomingStream, Channels, Clips, About, Community, Footer });
+Object.assign(window, { Logo, Hero, OnDuty, LiveNow, Channels, Clips, About, Community, Footer });
