@@ -5,3 +5,9 @@ window.TWEAKS_DEFAULT = {
   sound: true,
   lang: 'en',
 };
+
+// Optional editorial content. Sections stay hidden until real data is provided.
+window.SITE_CONTENT = {
+  nextStream: null,
+  clips: [],
+};

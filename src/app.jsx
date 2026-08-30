@@ -83,8 +83,10 @@ function App(){
       <Nav isLive={isLive} lang={tw.lang} setLang={v=>set('lang',v)} onCustomize={()=>setPanel(o=>!o)}/>
       <Hero isLive={isLive}/>
       <LiveNow data={liveData} unknown={liveUnknown} refreshing={refreshing} onRefresh={refreshLive}/>
+      <UpcomingStream/>
       <OnDuty/>
       <Channels/>
+      <Clips/>
       <About/>
       <Community/>
       <Footer/>

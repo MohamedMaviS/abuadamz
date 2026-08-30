@@ -8,6 +8,10 @@ const SRC = path.join(ROOT, 'src');
 const DIST = path.join(ROOT, 'dist');
 const JSX_FILES = ['icons.jsx', 'sections.jsx', 'tweaks.jsx', 'app.jsx'];
 const PLAIN_JS_FILES = ['config.js', 'effects.js', 'i18n.js'];
+const RUNTIME_FILES = [
+  ['vendor/react.js', path.join(ROOT, 'node_modules', 'react', 'umd', 'react.production.min.js')],
+  ['vendor/react-dom.js', path.join(ROOT, 'node_modules', 'react-dom', 'umd', 'react-dom.production.min.js')],
+];
 
 function hash(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12);
@@ -38,6 +42,11 @@ fs.mkdirSync(DIST, { recursive: true });
 
 const replacements = [];
 const assetRoot = path.join(ROOT, 'assets');
+
+for (const [logical, sourcePath] of RUNTIME_FILES) {
+  const output = fingerprint(logical, fs.readFileSync(sourcePath));
+  replacements.push([logical, output]);
+}
 
 for (const entry of fs.readdirSync(assetRoot, { withFileTypes: true })) {
   if (!entry.isFile()) continue;

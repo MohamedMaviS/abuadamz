@@ -33,6 +33,66 @@ function SecHead({ tag, icon, children }) {
   );
 }
 
+function localized(value, lang) {
+  if (value && typeof value === 'object') return value[lang] || value.en || value.ar || '';
+  return value || '';
+}
+
+function ShareButton() {
+  const { t } = useContext(LangContext);
+  const [copied, setCopied] = React.useState(false);
+  const resetTimer = React.useRef(null);
+  const shareUrl = document.querySelector('link[rel="canonical"]')?.href || `${location.origin}${location.pathname}`;
+
+  React.useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copyUrl = async () => {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareUrl);
+      return;
+    }
+    const field = document.createElement('textarea');
+    field.value = shareUrl;
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    document.body.appendChild(field);
+    field.select();
+    const copiedOk = document.execCommand('copy');
+    field.remove();
+    if (!copiedOk) throw new Error('copy-failed');
+  };
+
+  const share = async () => {
+    window.__click?.();
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, text: t.shareText, url: shareUrl });
+        return;
+      }
+      await copyUrl();
+      setCopied(true);
+      clearTimeout(resetTimer.current);
+      resetTimer.current = setTimeout(() => setCopied(false), 2200);
+    } catch (error) {
+      if (error && error.name === 'AbortError') return;
+      try {
+        await copyUrl();
+        setCopied(true);
+        clearTimeout(resetTimer.current);
+        resetTimer.current = setTimeout(() => setCopied(false), 2200);
+      } catch (_) {}
+    }
+  };
+
+  return (
+    <button className="btn btn-ghost sharebtn" type="button" onClick={share}
+      onMouseEnter={()=>window.__hover?.()} data-copied={copied}>
+      <Icon.Share/><span aria-live="polite">{copied ? t.shareCopied : t.shareSite}</span>
+    </button>
+  );
+}
+
 /* rotating hero line: phrases fade out / in on a loop */
 function RotatingLine() {
   const { t } = useContext(LangContext);
@@ -93,6 +153,7 @@ function Hero({ isLive }) {
             <a className="btn btn-ghost" href="#channels" onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
               <Icon.Arrow/><span>{t.heroChannels}</span>
             </a>
+            <ShareButton/>
           </div>
         </div>
       </div>
@@ -194,6 +255,104 @@ function LiveNow({ data, unknown, refreshing, onRefresh }) {
               <Icon.Refresh/><span>{t.refreshNow}</span>
             </button>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- OPTIONAL UPCOMING STREAM ---------------- */
+function UpcomingStream() {
+  const { lang, t } = useContext(LangContext);
+  const schedule = window.SITE_CONTENT && window.SITE_CONTENT.nextStream;
+  const startsAt = Date.parse(schedule && schedule.startsAt ? schedule.startsAt : '');
+  const [now, setNow] = React.useState(Date.now());
+
+  React.useEffect(() => {
+    if (!Number.isFinite(startsAt)) return undefined;
+    const id = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, [startsAt]);
+
+  if (!Number.isFinite(startsAt)) return null;
+
+  const remaining = Math.max(0, startsAt - now);
+  const totalMinutes = Math.floor(remaining / 60000);
+  const counting = totalMinutes > 0;
+  const values = [
+    { value: Math.floor(totalMinutes / 1440), label: t.scheduleDays },
+    { value: Math.floor((totalMinutes % 1440) / 60), label: t.scheduleHours },
+    { value: totalMinutes % 60, label: t.scheduleMinutes },
+  ];
+  const options = { dateStyle:'full', timeStyle:'short' };
+  if (schedule.timeZone) options.timeZone = schedule.timeZone;
+  let dateLabel;
+  try {
+    dateLabel = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', options).format(new Date(startsAt));
+  } catch (_) {
+    dateLabel = new Date(startsAt).toLocaleString();
+  }
+  const title = localized(schedule.title, lang) || t.scheduleTitle;
+  const url = schedule.url || `https://kick.com/${KICK_USER}`;
+
+  return (
+    <section className="sec schedule" id="schedule">
+      <div className="app-pad">
+        <div className="schedule__card rv rv-s">
+          <div className="schedule__copy">
+            <div className="tag"><span className="tag__star"><Icon.Live/></span>{t.scheduleTag}</div>
+            <h2>{title}</h2>
+            <p>{dateLabel}</p>
+          </div>
+          <div className="schedule__side">
+            <span className="schedule__label">{counting ? t.scheduleStarts : t.scheduleSoon}</span>
+            {counting && <div className="schedule__count" dir="ltr">
+              {values.map(item => (
+                <span className="schedule__unit" key={item.label}>
+                  <b>{String(item.value).padStart(2, '0')}</b><small>{item.label}</small>
+                </span>
+              ))}
+            </div>}
+            <a className="btn btn-primary" href={url} target="_blank" rel="noopener noreferrer"
+              onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
+              <Icon.Kick/><span>{t.scheduleCta}</span><Icon.Ext/>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- OPTIONAL CLIPS ---------------- */
+function Clips() {
+  const { lang, t } = useContext(LangContext);
+  const clips = Array.isArray(window.SITE_CONTENT && window.SITE_CONTENT.clips)
+    ? window.SITE_CONTENT.clips.filter(clip => clip && clip.url)
+    : [];
+  if (!clips.length) return null;
+
+  return (
+    <section className="sec clips" id="clips">
+      <div className="app-pad">
+        <SecHead tag={t.clipsTag} icon="Play">{t.clipsTitle}</SecHead>
+        <p className="lead rv clips__sub">{t.clipsSub}</p>
+        <div className="clips__grid">
+          {clips.map((clip, index) => {
+            const title = localized(clip.title, lang) || `${t.clipsTitle} ${index + 1}`;
+            return (
+              <a className="clip rv" key={clip.url} href={clip.url} target="_blank" rel="noopener noreferrer"
+                onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
+                <span className="clip__media">
+                  {clip.thumbnail
+                    ? <img src={clip.thumbnail} alt="" loading="lazy" decoding="async"/>
+                    : <span className="clip__fallback"><Logo lazy/></span>}
+                  <span className="clip__play"><Icon.Play/></span>
+                </span>
+                <span className="clip__body"><b>{title}</b><small>{t.clipWatch}<Icon.Ext/></small></span>
+              </a>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -347,4 +506,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Logo, Hero, OnDuty, LiveNow, Channels, About, Community, Footer });
+Object.assign(window, { Logo, Hero, OnDuty, LiveNow, UpcomingStream, Channels, Clips, About, Community, Footer });

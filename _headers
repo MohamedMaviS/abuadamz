@@ -10,13 +10,17 @@
   X-DNS-Prefetch-Control: on
   X-Permitted-Cross-Domain-Policies: none
   Origin-Agent-Cluster: ?1
-  Content-Security-Policy: default-src 'self'; script-src 'self' '__JSON_LD_HASH__' https://unpkg.com; script-src-elem 'self' '__JSON_LD_HASH__' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self'; connect-src 'self'; frame-src https://player.kick.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' '__JSON_LD_HASH__'; script-src-elem 'self' '__JSON_LD_HASH__'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self'; connect-src 'self'; frame-src https://player.kick.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
 
 /assets/*
   Cache-Control: public, max-age=31556952, immutable
   Cross-Origin-Resource-Policy: same-origin
 
 /src/*
+  Cache-Control: public, max-age=31556952, immutable
+  Cross-Origin-Resource-Policy: same-origin
+
+/vendor/*
   Cache-Control: public, max-age=31556952, immutable
   Cross-Origin-Resource-Policy: same-origin
 

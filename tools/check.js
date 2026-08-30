@@ -37,6 +37,7 @@ for (const required of ['index.html', '404.html', '_headers', 'robots.txt', 'sit
 
 if (files.includes('index.html')) {
   const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+  if (html.includes('unpkg.com')) errors.push('production HTML still depends on unpkg');
   const refs = [...html.matchAll(/(?:src|href)="([^"#]+)"/g)]
     .map((match) => match[1])
     .filter((ref) => !/^(?:https?:|data:|mailto:|tel:)/.test(ref));
@@ -49,6 +50,7 @@ if (files.includes('index.html')) {
 if (files.includes('_headers')) {
   const headers = fs.readFileSync(path.join(DIST, '_headers'), 'utf8');
   if (headers.includes('unsafe-eval')) errors.push('CSP still allows unsafe-eval');
+  if (headers.includes('unpkg.com')) errors.push('CSP still allows the retired unpkg runtime');
   if (headers.includes('__JSON_LD_HASH__')) errors.push('CSP hash placeholder remains');
   if (files.includes('index.html')) {
     const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
@@ -63,6 +65,11 @@ if (!files.some((file) => /^src\/app\.[a-f0-9]{12}\.js$/.test(file))) {
 }
 if (!files.some((file) => /^assets\/city\.[a-f0-9]{12}\.webp$/.test(file))) {
   errors.push('fingerprinted city image is missing');
+}
+for (const runtime of ['react', 'react-dom']) {
+  if (!files.some((file) => new RegExp(`^vendor/${runtime}\\.[a-f0-9]{12}\\.js$`).test(file))) {
+    errors.push(`fingerprinted ${runtime} runtime is missing`);
+  }
 }
 
 if (errors.length) {
