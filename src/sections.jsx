@@ -266,17 +266,19 @@ function UpcomingStream() {
   const { lang, t } = useContext(LangContext);
   const schedule = window.SITE_CONTENT && window.SITE_CONTENT.nextStream;
   const startsAt = Date.parse(schedule && schedule.startsAt ? schedule.startsAt : '');
+  const exactSchedule = Number.isFinite(startsAt);
+  const flexibleSchedule = schedule && schedule.mode === 'flexible';
   const [now, setNow] = React.useState(Date.now());
 
   React.useEffect(() => {
-    if (!Number.isFinite(startsAt)) return undefined;
+    if (!exactSchedule) return undefined;
     const id = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(id);
-  }, [startsAt]);
+  }, [exactSchedule, startsAt]);
 
-  if (!Number.isFinite(startsAt)) return null;
+  if (!exactSchedule && !flexibleSchedule) return null;
 
-  const remaining = Math.max(0, startsAt - now);
+  const remaining = exactSchedule ? Math.max(0, startsAt - now) : 0;
   const totalMinutes = Math.floor(remaining / 60000);
   const counting = totalMinutes > 0;
   const values = [
@@ -284,15 +286,17 @@ function UpcomingStream() {
     { value: Math.floor((totalMinutes % 1440) / 60), label: t.scheduleHours },
     { value: totalMinutes % 60, label: t.scheduleMinutes },
   ];
-  const options = { dateStyle:'full', timeStyle:'short' };
-  if (schedule.timeZone) options.timeZone = schedule.timeZone;
-  let dateLabel;
-  try {
-    dateLabel = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', options).format(new Date(startsAt));
-  } catch (_) {
-    dateLabel = new Date(startsAt).toLocaleString();
+  let dateLabel = t.scheduleFlexibleSub;
+  if (exactSchedule) {
+    const options = { dateStyle:'full', timeStyle:'short' };
+    if (schedule.timeZone) options.timeZone = schedule.timeZone;
+    try {
+      dateLabel = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', options).format(new Date(startsAt));
+    } catch (_) {
+      dateLabel = new Date(startsAt).toLocaleString();
+    }
   }
-  const title = localized(schedule.title, lang) || t.scheduleTitle;
+  const title = localized(schedule.title, lang) || (flexibleSchedule ? t.scheduleFlexibleTitle : t.scheduleTitle);
   const url = schedule.url || `https://kick.com/${KICK_USER}`;
 
   return (
@@ -305,7 +309,7 @@ function UpcomingStream() {
             <p>{dateLabel}</p>
           </div>
           <div className="schedule__side">
-            <span className="schedule__label">{counting ? t.scheduleStarts : t.scheduleSoon}</span>
+            <span className="schedule__label">{flexibleSchedule ? t.scheduleFlexibleBadge : (counting ? t.scheduleStarts : t.scheduleSoon)}</span>
             {counting && <div className="schedule__count" dir="ltr">
               {values.map(item => (
                 <span className="schedule__unit" key={item.label}>
@@ -340,13 +344,14 @@ function Clips() {
         <div className="clips__grid">
           {clips.map((clip, index) => {
             const title = localized(clip.title, lang) || `${t.clipsTitle} ${index + 1}`;
+            const PlatformIcon = clip.platform === 'tiktok' ? Icon.TikTok : Icon.Kick;
             return (
               <a className="clip rv" key={clip.url} href={clip.url} target="_blank" rel="noopener noreferrer"
                 onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
                 <span className="clip__media">
                   {clip.thumbnail
                     ? <img src={clip.thumbnail} alt="" loading="lazy" decoding="async"/>
-                    : <span className="clip__fallback"><Logo lazy/></span>}
+                    : <span className="clip__fallback clip__platform"><PlatformIcon/></span>}
                   <span className="clip__play"><Icon.Play/></span>
                 </span>
                 <span className="clip__body"><b>{title}</b><small>{t.clipWatch}<Icon.Ext/></small></span>

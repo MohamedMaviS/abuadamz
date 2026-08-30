@@ -7,7 +7,7 @@
     "build": "node tools/build.js",
     "build:legacy-cache-reset": "npm run check && node tools/build-legacy-cache-reset.js",
     "check": "npm run build && node tools/check.js && npm test",
-    "test": "node tools/test-functions.js",
+    "test": "node tools/test-functions.js && node tools/test-ui.js",
     "dev": "npm run build && wrangler pages dev dist",
     "start": "npm run dev",
     "deploy": "npm run check && wrangler pages deploy dist --project-name=abuadamz --branch=main"
