@@ -1,122 +1,93 @@
-// ============================================================
-// /api/live — live-status endpoint (Cloudflare Pages Function)
-// ------------------------------------------------------------
-// Browser CORS rules block the site from hitting kick.com /
-// youtube.com / tiktok.com directly, so we check here
-// server-side from Cloudflare's edge — no CORS, no quota, no middleman.
-//
-// Response shape:
-//   { isLive: boolean, platform: 'kick' | 'youtube' | 'tiktok',
-//     debug:  { kick, youtube, tiktok } }   // each true|false|null
-//
-// null means "could not determine" — the client keeps its
-// previous state so a transient upstream blip does not flip OFF.
-// ============================================================
-
 const KICK_USER = 'abu_adamz';
-const YT_USER = 'ABU_ADAMZ';
-const TIKTOK_USER = 'ABUADAMZ';
-
+const UPSTREAM_TIMEOUT_MS = 5000;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
-// --- Kick: clean JSON API. `livestream` is an object while live, null while offline.
-// Returns rich info: { live, title, viewers, category }. live === null => unknown.
+function securityHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': 'public, s-maxage=20, stale-while-revalidate=40',
+    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Referrer-Policy': 'no-referrer',
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+  };
+}
+
 async function checkKick() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
-    const r = await fetch(`https://kick.com/api/v2/channels/${KICK_USER}`, {
+    const response = await fetch(`https://kick.com/api/v2/channels/${KICK_USER}`, {
       headers: {
         'User-Agent': UA,
-        'Accept': 'application/json, text/plain, */*',
+        Accept: 'application/json, text/plain, */*',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': `https://kick.com/${KICK_USER}`,
+        Referer: `https://kick.com/${KICK_USER}`,
       },
       cache: 'no-store',
+      signal: controller.signal,
     });
-    if (!r.ok) return { live: null };
-    const d = await r.json();
-    const ls = d && d.livestream;
-    if (ls) {
-      const live = (typeof ls.is_live === 'boolean') ? ls.is_live : true;
-      const cat = ls.categories && ls.categories[0] && ls.categories[0].name;
-      const thumb = ls.thumbnail && (ls.thumbnail.url || ls.thumbnail.src);
-      return {
-        live,
-        title: (ls.session_title || '').trim(),
-        viewers: (typeof ls.viewer_count === 'number') ? ls.viewer_count : null,
-        category: cat || '',
-        thumb: thumb || '',
-      };
-    }
-    return { live: false };
-  } catch {
-    return { live: null };
-  }
-}
+    if (!response.ok) return { live: null, reason: `upstream-${response.status}` };
 
-// --- YouTube: scrape the /live page for live-only markers.
-async function checkYouTube() {
-  try {
-    const r = await fetch(`https://www.youtube.com/@${YT_USER}/live`, {
-      headers: { 'User-Agent': UA, 'Accept': 'text/html', 'Accept-Language': 'en-US,en;q=0.9' },
-      cache: 'no-store', redirect: 'follow',
-    });
-    if (!r.ok) return null;
-    const html = await r.text();
-    if (/hlsManifestUrl/i.test(html)) return true;
-    if (/"isLiveNow"\s*:\s*true/i.test(html)) return true;
-    if (/"liveBroadcastContent"\s*:\s*"live"/i.test(html)) return true;
-    return false;
-  } catch {
-    return null;
-  }
-}
+    const data = await response.json();
+    const livestream = data && data.livestream;
+    if (!livestream) return { live: false, title: '', viewers: null, category: '', thumb: '' };
 
-// --- TikTok: no public API. Scrape the /live page for live-only markers.
-async function checkTikTok() {
-  try {
-    const r = await fetch(`https://www.tiktok.com/@${TIKTOK_USER}/live`, {
-      headers: { 'User-Agent': UA, 'Accept': 'text/html', 'Accept-Language': 'en-US,en;q=0.9' },
-      cache: 'no-store',
-    });
-    if (!r.ok) return null;
-    const html = await r.text();
-    if (/liveRoom[\s\S]{0,1200}?"status"\s*:\s*2/i.test(html)) return true;
-    if (/"@type"\s*:\s*"BroadcastEvent"/i.test(html)) return true;
-    if (/"isLive"\s*:\s*true/i.test(html)) return true;
-    return false;
-  } catch {
-    return null;
+    const category = livestream.categories && livestream.categories[0] && livestream.categories[0].name;
+    const thumbnail = livestream.thumbnail && (livestream.thumbnail.url || livestream.thumbnail.src);
+    return {
+      live: typeof livestream.is_live === 'boolean' ? livestream.is_live : true,
+      title: (livestream.session_title || '').trim(),
+      viewers: typeof livestream.viewer_count === 'number' ? livestream.viewer_count : null,
+      category: category || '',
+      thumb: thumbnail || '',
+    };
+  } catch (error) {
+    return { live: null, reason: error && error.name === 'AbortError' ? 'timeout' : 'upstream-error' };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 export async function onRequest(context) {
-  const [kick, youtube, tiktok] = await Promise.all([checkKick(), checkYouTube(), checkTikTok()]);
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...securityHeaders(),
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
+  if (context.request.method !== 'GET' && context.request.method !== 'HEAD') {
+    return new Response(JSON.stringify({ error: 'method_not_allowed' }), {
+      status: 405,
+      headers: { ...securityHeaders(), Allow: 'GET, HEAD, OPTIONS' },
+    });
+  }
 
-  let isLive = false;
-  let platform = 'kick';
-  if (kick.live === true)    { isLive = true; platform = 'kick';    }
-  else if (youtube === true) { isLive = true; platform = 'youtube'; }
-  else if (tiktok === true)  { isLive = true; platform = 'tiktok';  }
-
-  const body = {
-    isLive,
-    platform,
+  const kick = await checkKick();
+  const status = kick.live === null ? 'unknown' : kick.live ? 'live' : 'offline';
+  const body = JSON.stringify({
+    status,
+    isLive: kick.live,
+    platform: 'kick',
     kick: {
-      live: kick.live === true,
+      live: kick.live,
       title: kick.title || '',
-      viewers: (typeof kick.viewers === 'number') ? kick.viewers : null,
+      viewers: typeof kick.viewers === 'number' ? kick.viewers : null,
       category: kick.category || '',
       thumb: kick.thumb || '',
     },
-    debug: { kick: kick.live, youtube, tiktok },
-  };
+    checkedAt: new Date().toISOString(),
+  });
 
-  return new Response(JSON.stringify(body), {
+  return new Response(context.request.method === 'HEAD' ? null : body, {
     status: 200,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'public, s-maxage=20, stale-while-revalidate=40',
-      'access-control-allow-origin': '*',
-    },
+    headers: securityHeaders(),
   });
 }

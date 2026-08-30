@@ -128,11 +128,11 @@ function OnDuty() {
 }
 
 /* ---------------- LIVE NOW (Kick status, embeds the live stream) ---------------- */
-function LiveNow({ data, refreshing, onRefresh }) {
+function LiveNow({ data, unknown, refreshing, onRefresh }) {
   const { t } = useContext(LangContext);
   const KICK = `https://kick.com/${KICK_USER}`;
   const k = data && data.kick;
-  const live = !!(k && k.live);
+  const live = data?.isLive === true;
   const fmtNum = (n)=> (typeof n==='number') ? n.toLocaleString('en-US') : null;
   const title = (k && k.title) ? k.title : '';
   const viewers = k ? fmtNum(k.viewers) : null;
@@ -141,13 +141,13 @@ function LiveNow({ data, refreshing, onRefresh }) {
   return (
     <section className="sec live" id="live">
       <div className="app-pad">
-        <div className={`liveband rv rv-s ${live?'is-live':(data?'is-off':'is-load')}`}>
+        <div className={`liveband rv rv-s ${live?'is-live':(data?'is-off':(unknown?'is-unknown':'is-load'))} ${unknown?'has-unknown':''}`} aria-busy={refreshing}>
           <span className="liveband__bg" aria-hidden="true"></span>
 
           <div className="liveband__top">
-            <span className={`livestat ${live?'on':''}`}>
+            <span className={`livestat ${live&&!unknown?'on':''}`}>
               <span className="livestat__dots"><i></i><i></i></span>
-              {live ? t.liveNowLab : t.offlineLab}
+              {unknown ? t.liveUnknownLab : (live ? t.liveNowLab : t.offlineLab)}
             </span>
             <a className="liveband__url" href={KICK} target="_blank" rel="noopener noreferrer"
                onMouseEnter={()=>window.__hover?.()}>kick.com/{KICK_USER}</a>
@@ -176,10 +176,10 @@ function LiveNow({ data, refreshing, onRefresh }) {
             </div>
           ) : (
             <div className="liveband__off">
-              <span className="liveband__offic">{data ? <Icon.Shield/> : <Icon.Refresh/>}</span>
-              <h3 className="liveband__title liveband__title--off">{data ? t.liveOfflineTitle : t.liveLoading}</h3>
-              {data && <p className="liveband__sub">{t.liveOfflineSub}</p>}
-              {data &&
+              <span className="liveband__offic">{unknown ? <Icon.Refresh/> : (data ? <Icon.Shield/> : <Icon.Refresh/>)}</span>
+              <h3 className="liveband__title liveband__title--off">{unknown ? t.liveUnknownTitle : (data ? t.liveOfflineTitle : t.liveLoading)}</h3>
+              {(unknown || data) && <p className="liveband__sub">{unknown ? t.liveUnknownSub : t.liveOfflineSub}</p>}
+              {data && !unknown &&
                 <a className="btn btn-primary liveband__cta" href={KICK} target="_blank" rel="noopener noreferrer"
                    data-kpv onMouseEnter={()=>window.__hover?.()} onClick={()=>window.__click?.()}>
                   <Icon.Kick/><span>{t.heroWatch}</span><Icon.Ext/>
@@ -188,9 +188,9 @@ function LiveNow({ data, refreshing, onRefresh }) {
           )}
 
           <div className="liveband__foot">
-            <span className="liveband__auto"><span className={`liveband__pulse ${live?'on':''}`}></span>{t.autoRefresh}</span>
+            <span className="liveband__auto"><span className={`liveband__pulse ${live&&!unknown?'on':''}`}></span>{unknown ? t.statusStale : t.autoRefresh}</span>
             <button className={`refreshbtn ${refreshing?'spin':''}`} onClick={()=>{ onRefresh&&onRefresh(); window.__click?.(); }}
-               onMouseEnter={()=>window.__hover?.()} aria-label={t.refreshNow}>
+               onMouseEnter={()=>window.__hover?.()} aria-label={t.refreshNow} disabled={refreshing}>
               <Icon.Refresh/><span>{t.refreshNow}</span>
             </button>
           </div>

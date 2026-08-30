@@ -7,7 +7,9 @@
   if (!c) return;
   const ctx = c.getContext('2d');
   const DPR = Math.min(1.5, window.devicePixelRatio || 1);
-  let W, H, motes = [], raf = 0, paused = false;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, motes = [], raf = 0, paused = document.hidden, lastFrame = 0;
+  const fxLevel = () => document.documentElement.getAttribute('data-fx') || 'high';
 
   let gold = '#e9b949', volt = '#ffd86b';
   const readVars = () => {
@@ -43,16 +45,31 @@
     };
   }
   function make() {
-    const n = innerWidth < 768 ? 20 : 42;
+    const level = fxLevel();
+    const n = level === 'low' ? 0 : level === 'normal' ? (innerWidth < 768 ? 12 : 24) : (innerWidth < 768 ? 20 : 42);
     motes = [];
     for (let i = 0; i < n; i++) motes.push(spawn(true));
   }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    ctx.clearRect(0, 0, W, H);
+  }
+  function start() {
+    if (reducedMotion || paused || fxLevel() === 'low' || raf) return;
+    last = performance.now();
+    raf = requestAnimationFrame(tick);
+  }
   size(); make();
-  addEventListener('resize', () => { size(); make(); });
+  addEventListener('resize', () => { size(); make(); start(); });
   document.addEventListener('visibilitychange', () => {
     paused = document.hidden;
-    if (!paused) raf = requestAnimationFrame(tick);
+    if (paused) stop(); else { make(); start(); }
   });
+  new MutationObserver(() => {
+    make();
+    if (fxLevel() === 'low') stop(); else start();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-fx'] });
 
   // green light sweep timing
   let sweepT = -2;            // seconds into the current sweep (negative = waiting)
@@ -62,7 +79,10 @@
 
   let fc = 0;
   function tick(now) {
-    if (paused) return;
+    raf = 0;
+    if (paused || reducedMotion || fxLevel() === 'low') return;
+    if (fxLevel() === 'normal' && now - lastFrame < 32) { raf = requestAnimationFrame(tick); return; }
+    lastFrame = now;
     if ((++fc & 127) === 0) readVars();
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const [gr, gg, gb] = rgb(gold);
@@ -111,11 +131,7 @@
     ctx.globalCompositeOperation = 'source-over';
     raf = requestAnimationFrame(tick);
   }
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    raf = requestAnimationFrame(tick);
-  } else {
-    tick(performance.now()); cancelAnimationFrame(raf);
-  }
+  start();
 })();
 
 /* ---------- Pointer gold light ---------- */
@@ -133,6 +149,7 @@
     else raf = 0;
   };
   addEventListener('pointermove', (e) => {
+    if (document.documentElement.getAttribute('data-fx') === 'low') return;
     tx = e.clientX; ty = e.clientY;
     if (!raf) raf = requestAnimationFrame(move);
   }, { passive: true });
@@ -166,19 +183,22 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.innerWidth < 768) return;
   const SEL = '[data-tilt]';
+  const enabled = () => document.documentElement.getAttribute('data-fx') !== 'low';
   const reg = () => {
     document.querySelectorAll(SEL + ':not([data-tb])').forEach(el => {
       el.dataset.tb = 1;
       const MAX = +(el.dataset.tilt || 8);
       let rid = 0, trx = 0, try_ = 0, crx = 0, cry = 0, on = false, rect = null;
       const paint = () => {
+        if (!enabled()) { on=false; trx=0; try_=0; crx=0; cry=0; el.style.transform=''; rid=0; return; }
         crx += (trx - crx) * .16; cry += (try_ - cry) * .16;
         if (!on && Math.abs(crx) < .04 && Math.abs(cry) < .04) { el.style.transform = ''; rid = 0; return; }
         el.style.transform = `perspective(1000px) rotateX(${crx.toFixed(2)}deg) rotateY(${cry.toFixed(2)}deg) translateZ(0)`;
         rid = requestAnimationFrame(paint);
       };
-      el.addEventListener('pointerenter', () => { on = true; rect = el.getBoundingClientRect(); if (!rid) rid = requestAnimationFrame(paint); });
+      el.addEventListener('pointerenter', () => { if (!enabled()) return; on = true; rect = el.getBoundingClientRect(); if (!rid) rid = requestAnimationFrame(paint); });
       el.addEventListener('pointermove', (e) => {
+        if (!enabled()) return;
         if (!rect) rect = el.getBoundingClientRect();
         const nx = ((e.clientX - rect.left) / rect.width - .5) * 2;
         const ny = ((e.clientY - rect.top) / rect.height - .5) * 2;
@@ -188,6 +208,9 @@
     });
   };
   window.__tilt = reg;
+  new MutationObserver(() => {
+    if (!enabled()) document.querySelectorAll(SEL).forEach(el => { el.style.transform=''; });
+  }).observe(document.documentElement, { attributes:true, attributeFilter:['data-fx'] });
   setTimeout(reg, 400); setTimeout(reg, 1400);
   setTimeout(() => {
     const root = document.getElementById('app'); if (!root) return;

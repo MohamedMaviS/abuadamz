@@ -1,6 +1,14 @@
 function TweaksPanel({ tw, set, open, onClose }) {
-  if (!open) return null;
   const { t } = React.useContext(LangContext);
+  const closeRef = React.useRef(null);
+  const previousFocus = React.useRef(null);
+  React.useEffect(()=>{
+    if(!open) return;
+    previousFocus.current=document.activeElement;
+    const id=setTimeout(()=>closeRef.current?.focus(),0);
+    return ()=>{ clearTimeout(id); previousFocus.current?.focus?.(); };
+  },[open]);
+  if (!open) return null;
   const themes = [
     { k:'dynasty', c:'#e9b949', bg:'linear-gradient(135deg,#0a0703,#1b1208)' },
     { k:'royal',   c:'#ffcf66', bg:'linear-gradient(135deg,#0c0805,#23160a)' },
@@ -9,8 +17,8 @@ function TweaksPanel({ tw, set, open, onClose }) {
   ];
   const accents = ['#e9b949','#f5c451','#ffd86b','#ffcf66','#d9a441','#c8912b','#b9822a','#f0e0b0','#d9c79a','#e7e7ea'];
   return (
-    <div className="tw">
-      <div className="tw__hd"><span>{t.twTitle}</span><button className="tw__x" onClick={onClose} aria-label="Close">✕</button></div>
+    <div className="tw" role="dialog" aria-modal="false" aria-label={t.twTitle} onKeyDown={(e)=>{if(e.key==='Escape')onClose();}}>
+      <div className="tw__hd"><span>{t.twTitle}</span><button ref={closeRef} className="tw__x" onClick={onClose} aria-label="Close">✕</button></div>
       <div className="tw__bd">
         <div className="tw__row">
           <span className="tw__lab">{t.twLang}</span>

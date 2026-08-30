@@ -4,8 +4,12 @@
   "private": true,
   "description": "ABU ADAMZ . Streamer / Police RP Commander landing page.",
   "scripts": {
-    "dev": "npx serve -l 3000 .",
-    "start": "npx serve -l 3000 ."
+    "build": "node tools/build.js",
+    "check": "npm run build && node tools/check.js && npm test",
+    "test": "node tools/test-functions.js",
+    "dev": "npm run build && wrangler pages dev dist",
+    "start": "npm run dev",
+    "deploy": "npm run check && wrangler pages deploy dist --project-name=abuadamz --branch=main"
   },
   "keywords": [
     "abu adamz",
@@ -17,8 +21,9 @@
     "gaming"
   ],
   "author": "MaviS",
-  "dependencies": {
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0"
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "wrangler": "^4.127.1"
   }
 }

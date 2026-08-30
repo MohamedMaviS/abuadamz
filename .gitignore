@@ -3,6 +3,7 @@ node_modules/
 Thumbs.db
 *.log
 .vercel
+.wrangler/
 .env
 .env*.local
 .vscode/

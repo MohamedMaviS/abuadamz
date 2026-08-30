@@ -9,17 +9,38 @@ function App(){
   const [tw,setTw]=useState(window.TWEAKS_DEFAULT);
   const [panel,setPanel]=useState(false);
   const [liveData,setLiveData]=useState(null);
+  const [liveUnknown,setLiveUnknown]=useState(false);
   const [refreshing,setRefreshing]=useState(false);
-  const isLive=!!(liveData&&liveData.isLive);
+  const liveRequest=useRef(null);
+  const liveController=useRef(null);
+  const isLive=liveData?.isLive===true;
 
   const set=(k,v)=>setTw(p=>({...p,[k]:v}));
 
-  const refreshLive=React.useCallback(async()=>{
-    setRefreshing(true);
-    let ok=false;
-    try{ const r=await fetch('/api/live',{cache:'no-store'}); if(r.ok){ const d=await r.json(); if(d&&typeof d.isLive==='boolean'){ setLiveData(d); ok=true; } } }catch(_){}
-    setRefreshing(false);
-    return ok;
+  const refreshLive=React.useCallback(()=>{
+    if(liveRequest.current) return liveRequest.current;
+    const controller=new AbortController();
+    liveController.current=controller;
+    const timeout=setTimeout(()=>controller.abort(),8000);
+    const job=(async()=>{
+      setRefreshing(true);
+      try{
+        const r=await fetch('/api/live',{cache:'no-store',signal:controller.signal});
+        if(!r.ok) throw new Error(`live-status-${r.status}`);
+        const d=await r.json();
+        if(!d||!(typeof d.isLive==='boolean'||d.isLive===null)) throw new Error('invalid-live-status');
+        if(d.isLive===null){ setLiveUnknown(true); return false; }
+        setLiveData(d); setLiveUnknown(false); return true;
+      }catch(_){ setLiveUnknown(true); return false; }
+      finally{
+        clearTimeout(timeout);
+        setRefreshing(false);
+        liveRequest.current=null;
+        if(liveController.current===controller) liveController.current=null;
+      }
+    })();
+    liveRequest.current=job;
+    return job;
   },[]);
 
   useEffect(()=>{
@@ -51,7 +72,7 @@ function App(){
     run();
     if(document.visibilityState==='visible') start();
     document.addEventListener('visibilitychange',onVis);
-    return ()=>{ stop(); document.removeEventListener('visibilitychange',onVis); };
+    return ()=>{ stop(); document.removeEventListener('visibilitychange',onVis); liveController.current?.abort(); };
   },[refreshLive]);
 
   useEffect(()=>{ setTimeout(()=>window.__reveal?.(),80); },[tw.lang]);
@@ -61,7 +82,7 @@ function App(){
     <LangContext.Provider value={{lang:tw.lang,t}}>
       <Nav isLive={isLive} lang={tw.lang} setLang={v=>set('lang',v)} onCustomize={()=>setPanel(o=>!o)}/>
       <Hero isLive={isLive}/>
-      <LiveNow data={liveData} refreshing={refreshing} onRefresh={refreshLive}/>
+      <LiveNow data={liveData} unknown={liveUnknown} refreshing={refreshing} onRefresh={refreshLive}/>
       <OnDuty/>
       <Channels/>
       <About/>
@@ -127,7 +148,7 @@ function KickPreview(){
       let left=r.left+r.width/2-W/2; left=Math.max(16,Math.min(left,innerWidth-W-16));
       setPos({top,left}); setMount(true); setShow(true);
     };
-    const sched=()=>{ clearTimeout(hide.current); hide.current=setTimeout(()=>setShow(false),200); };
+    const sched=()=>{ clearTimeout(hide.current); hide.current=setTimeout(()=>{setShow(false);setMount(false);},200); };
     const over=(e)=>{ const tg=e.target.closest('[data-kpv]'); if(tg){open(tg);return;} if(e.target.closest('.kpv')) clearTimeout(hide.current); };
     const out=(e)=>{ const tg=e.target.closest('[data-kpv]'); if(!tg)return; const g=e.relatedTarget; if(g&&(g.closest?.('[data-kpv]')||g.closest?.('.kpv')))return; sched(); };
     const pout=(e)=>{ if(!e.target.closest('.kpv'))return; const g=e.relatedTarget; if(g&&(g.closest?.('[data-kpv]')||g.closest?.('.kpv')))return; sched(); };
@@ -139,26 +160,28 @@ function KickPreview(){
 
   return (
     <div className={`kpv ${show?'show':''}`} style={{top:pos.top,left:pos.left}} aria-hidden={!show}>
-      <div className="kpv__v">
-        {mount && <iframe key={`k-${muted?'m':'u'}-${Math.round(vol*10)}`}
-          src={`https://player.kick.com/${KICK_USER}?autoplay=true&muted=${muted}&volume=${vol}`}
-          title="ABU ADAMZ live on Kick" allow="autoplay; fullscreen; picture-in-picture" loading="lazy"/>}
-      </div>
-      <div className="kpv__ft">
-        <span className="kpv__dot"></span><span>KICK.COM/{KICK_USER.toUpperCase()}</span>
-        <span className="kpv__au">
-          <button className="kpv__mute" onClick={(e)=>{e.preventDefault();e.stopPropagation();setMuted(m=>!m);}} aria-label={muted?'Unmute':'Mute'}>
-            {muted?(
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            ):(
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            )}
-          </button>
-          <input className="kpv__vol" type="range" min="0" max="1" step="0.05" value={muted?0:vol}
-            onChange={(e)=>{const v=parseFloat(e.target.value);setVol(v);setMuted(v===0);}}
-            onClick={(e)=>e.stopPropagation()} aria-label="Volume"/>
-        </span>
-      </div>
+      {mount && <>
+        <div className="kpv__v">
+          <iframe key={`k-${muted?'m':'u'}-${Math.round(vol*10)}`}
+            src={`https://player.kick.com/${KICK_USER}?autoplay=true&muted=${muted}&volume=${vol}`}
+            title="ABU ADAMZ live on Kick" allow="autoplay; fullscreen; picture-in-picture" loading="lazy"/>
+        </div>
+        <div className="kpv__ft">
+          <span className="kpv__dot"></span><span>KICK.COM/{KICK_USER.toUpperCase()}</span>
+          <span className="kpv__au">
+            <button className="kpv__mute" onClick={(e)=>{e.preventDefault();e.stopPropagation();setMuted(m=>!m);}} aria-label={muted?'Unmute':'Mute'}>
+              {muted?(
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+              ):(
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              )}
+            </button>
+            <input className="kpv__vol" type="range" min="0" max="1" step="0.05" value={muted?0:vol}
+              onChange={(e)=>{const v=parseFloat(e.target.value);setVol(v);setMuted(v===0);}}
+              onClick={(e)=>e.stopPropagation()} aria-label="Volume"/>
+          </span>
+        </div>
+      </>}
     </div>
   );
 }
@@ -200,7 +223,7 @@ function MusicPlayer(){
 
   /* No auto-start: playback only begins when the user hits play. */
 
-  const seekTo = (e)=>{ const a=audioRef.current; if(!a||!dur) return; const r=e.currentTarget.getBoundingClientRect(); let x=(e.clientX-r.left)/r.width; x=Math.max(0,Math.min(1,x)); a.currentTime=x*dur; setCur(a.currentTime); };
+  const seekTo = (e)=>{ const a=audioRef.current; if(!a||!dur) return; const next=Math.max(0,Math.min(dur,Number(e.target.value))); a.currentTime=next; setCur(next); };
   const pick = (i)=>{ setIdx(i); setPlaying(true); window.__click?.(); };
 
   const t = TRACKS[idx];
@@ -210,7 +233,7 @@ function MusicPlayer(){
     <div className={`mp ${open?'is-open':''}`} data-playing={playing}>
       <audio ref={audioRef} src={t.src} preload="metadata"/>
 
-      <div className="mp__panel" role="region" aria-label="Music player" aria-hidden={!open}>
+      {open && <div className="mp__panel" role="region" aria-label="Music player">
         <div className="mp__hd">
           <span className="mp__hdlab"><span className="mp__eq"><i/><i/><i/></span>NOW PLAYING · {idx+1}/{TRACKS.length}</span>
           <button className="mp__x" onClick={()=>{ setOpen(false); window.__click?.(); }} aria-label="Close">
@@ -227,7 +250,8 @@ function MusicPlayer(){
         </div>
 
         <div className="mp__seek" dir="ltr">
-          <div className="mp__bar" onClick={seekTo}>
+          <div className="mp__bar">
+            <input className="mp__seekinput" type="range" min="0" max={dur||0} step="0.1" value={Math.min(cur,dur||0)} onChange={seekTo} aria-label="Seek audio"/>
             <div className="mp__fill" style={{width:pct+'%'}}/>
             <span className="mp__knob" style={{left:pct+'%'}}/>
           </div>
@@ -268,7 +292,7 @@ function MusicPlayer(){
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       <button className="mp__fab" onClick={()=>{ setOpen(o=>!o); window.__click?.(); }} aria-label="Music player" aria-expanded={open}>
         <span className="mp__eq mp__eq--fab" aria-hidden="true"><i/><i/><i/><i/></span>

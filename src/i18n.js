@@ -34,6 +34,10 @@ const I18N = {
     autoRefresh:'Live, auto-synced every 60s',
     refreshNow:'Sync now',
     liveLoading:'Syncing with Kick...',
+    liveUnknownLab:'STATUS DELAYED',
+    liveUnknownTitle:'Keeping the Last Known Status',
+    liveUnknownSub:'Kick did not answer in time. The last confirmed status is kept and another check will run automatically.',
+    statusStale:'Kick is delayed · last confirmed status kept',
 
     chTitleA:'EVERY CHANNEL.',
     chTitleB:'ONE COMMAND.',
@@ -98,6 +102,10 @@ const I18N = {
     autoRefresh:'لايف، بيزامن أوتوماتيك كل 60 ثانية',
     refreshNow:'زامن دلوقتي',
     liveLoading:'بيزامن مع Kick...',
+    liveUnknownLab:'التحديث متأخر',
+    liveUnknownTitle:'محتفظين بآخر حالة مؤكدة',
+    liveUnknownSub:'Kick مردّش في الوقت المحدد. آخر حالة مؤكدة محفوظة وهتتراجع تاني أوتوماتيك.',
+    statusStale:'Kick متأخر · آخر حالة مؤكدة محفوظة',
 
     chTitleA:'كل القنوات،',
     chTitleB:'تحت أمر واحد.',

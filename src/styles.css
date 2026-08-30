@@ -5,6 +5,7 @@
 
 html{ overflow-x:hidden; }
 .app-pad{ width:100%; max-width:1200px; margin-inline:auto; padding-inline:clamp(18px,5vw,56px); }
+:where(a,button,input,[tabindex]):focus-visible{ outline:3px solid var(--gold-1); outline-offset:4px; }
 
 /* ---------- Shared type ---------- */
 .tag{
@@ -321,6 +322,7 @@ html:not(.ready) .rv{ opacity:0; }
   border:1px solid var(--ac-soft); background:linear-gradient(135deg, color-mix(in oklab,var(--ac) 7%, var(--bg-2)), var(--bg-2) 62%);
   box-shadow:0 22px 54px rgba(0,0,0,.5); transition:border-color .3s, box-shadow .3s; }
 .liveband.is-live{ border-color:color-mix(in oklab,var(--ac) 45%, transparent); box-shadow:0 22px 54px rgba(0,0,0,.5), 0 0 34px var(--ac-soft); }
+.liveband.has-unknown{ border-style:dashed; }
 .liveband__bg{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.6;
   background:radial-gradient(120% 140% at 100% 0%, var(--ac-soft), transparent 55%),
              repeating-linear-gradient(115deg, transparent 0 22px, rgba(233,185,73,.025) 22px 23px); }
@@ -390,6 +392,7 @@ html:not(.ready) .rv{ opacity:0; }
   padding:8px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--dim); transition:color .2s, border-color .2s; }
 [dir="rtl"] .refreshbtn{ font-family:var(--f-ar); }
 .refreshbtn:hover{ color:var(--ac); border-color:var(--ac); }
+.refreshbtn:disabled{ opacity:.55; cursor:wait; }
 .refreshbtn svg{ width:15px; height:15px; }
 .refreshbtn.spin svg{ animation:spin .9s linear infinite; }
 
@@ -489,6 +492,8 @@ html:not(.ready) .rv{ opacity:0; }
 
 .mp__seek{ margin-bottom:14px; }
 .mp__bar{ position:relative; height:6px; border-radius:999px; background:var(--line); cursor:pointer; }
+.mp__bar:focus-within{ box-shadow:0 0 0 3px var(--ac-soft),0 0 0 1px var(--gold-1); }
+.mp__seekinput{ position:absolute; z-index:3; inset:-9px 0; width:100%; height:24px; margin:0; opacity:0; cursor:pointer; }
 .mp__fill{ position:absolute; inset-block:0; left:0; border-radius:999px; background:linear-gradient(90deg,var(--gold-3),var(--gold-1)); }
 .mp__knob{ position:absolute; top:50%; width:13px; height:13px; border-radius:50%; transform:translate(-50%,-50%); background:var(--gold-1); box-shadow:0 0 10px rgba(233,185,73,.7); }
 .mp__time{ display:flex; justify-content:space-between; margin-top:7px; font-family:var(--f-head); font-size:10.5px; letter-spacing:.04em; color:var(--faint); font-variant-numeric:tabular-nums; }
