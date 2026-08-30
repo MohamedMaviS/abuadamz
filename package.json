@@ -5,6 +5,7 @@
   "description": "ABU ADAMZ . Streamer / Police RP Commander landing page.",
   "scripts": {
     "build": "node tools/build.js",
+    "build:legacy-cache-reset": "npm run check && node tools/build-legacy-cache-reset.js",
     "check": "npm run build && node tools/check.js && npm test",
     "test": "node tools/test-functions.js",
     "dev": "npm run build && wrangler pages dev dist",
