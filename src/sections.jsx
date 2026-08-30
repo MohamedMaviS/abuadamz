@@ -283,6 +283,7 @@ function Clips() {
   const [nextCursor, setNextCursor] = React.useState('');
   const [status, setStatus] = React.useState('loading');
   const [loadingMore, setLoadingMore] = React.useState(false);
+  const [tiktokHeight, setTikTokHeight] = React.useState(680);
   const railRef = React.useRef(null);
   const sentinelRef = React.useRef(null);
 
@@ -342,20 +343,18 @@ function Clips() {
   }, [nextCursor, loadingMore, loadMore]);
 
   React.useEffect(() => {
-    const scriptId = 'tiktok-creator-embed';
-    const render = () => window.tiktokEmbed?.lib?.render?.();
-    const existing = document.getElementById(scriptId);
-    if (existing) {
-      render();
-      return undefined;
-    }
-    const script = document.createElement('script');
-    script.id = scriptId;
-    script.src = 'https://www.tiktok.com/embed.js';
-    script.async = true;
-    script.onload = render;
-    document.body.appendChild(script);
-    return undefined;
+    const onMessage = event => {
+      if (event.origin !== 'https://www.tiktok.com') return;
+      let payload = event.data;
+      if (typeof payload === 'string') {
+        try { payload = JSON.parse(payload); } catch (_) { return; }
+      }
+      if (!payload || payload.signalSource !== '__tt_embed__abuadamz') return;
+      const height = Number(payload.height);
+      if (Number.isFinite(height) && height >= 420 && height <= 1400) setTikTokHeight(height);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
   }, []);
 
   const scrollRail = direction => {
@@ -424,10 +423,11 @@ function Clips() {
             <span className="auto-badge"><i></i>{t.clipsAuto}</span>
           </div>
           <div className="tiktok-showcase__embed" dir="ltr">
-            <blockquote className="tiktok-embed" cite="https://www.tiktok.com/@abuadamz"
-              data-unique-id="abuadamz" data-embed-type="creator">
-              <section><a target="_blank" rel="noopener noreferrer" href="https://www.tiktok.com/@abuadamz?refer=creator_embed">@ABUADAMZ</a></section>
-            </blockquote>
+            <iframe className="tiktok-showcase__frame" name="__tt_embed__abuadamz"
+              src={`https://www.tiktok.com/embed/@abuadamz?lang=${lang === 'ar' ? 'ar' : 'en'}&embedFrom=oembed`}
+              title={t.clipsTikTokTitle} height={tiktokHeight}
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-scripts allow-top-navigation-by-user-activation allow-same-origin"
+              allow="autoplay; fullscreen" loading="lazy"/>
           </div>
         </div>
       </div>

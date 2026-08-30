@@ -247,11 +247,9 @@ html{ overflow-x:hidden; }
 .clips__spinner{ width:24px; height:24px; border-radius:50%; border:2px solid var(--line); border-top-color:var(--ac); animation:spin .7s linear infinite; }
 .clips__all{ display:inline-flex; align-items:center; gap:7px; margin-top:14px; font-size:12px; }
 .clips__all svg{ width:14px; height:14px; }
-.tiktok-showcase__embed{ width:100%; min-height:470px; display:grid; place-items:center; overflow:hidden; border-radius:18px;
+.tiktok-showcase__embed{ width:100%; min-height:470px; display:grid; place-items:start center; overflow:hidden; border-radius:18px;
   background:radial-gradient(circle at 50% 10%,rgba(37,244,238,.09),transparent 34%),rgba(0,0,0,.14); }
-.tiktok-showcase .tiktok-embed{ width:100%!important; max-width:780px!important; min-width:288px!important; margin:0 auto!important; }
-.tiktok-showcase .tiktok-embed>section{ min-height:440px; display:grid; place-items:center; }
-.tiktok-showcase .tiktok-embed>section a{ color:#25f4ee; font-family:var(--f-head); font-weight:800; }
+.tiktok-showcase__frame{ display:block; width:100%; max-width:780px; min-width:288px; border:0; background:transparent; }
 
 /* =====================================================================
    ABOUT / THE COMMANDER

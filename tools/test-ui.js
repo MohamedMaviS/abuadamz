@@ -50,9 +50,10 @@ function render(Component, lang) {
 const clipsEnglish = render(Clips, 'en');
 assert.match(clipsEnglish, /KICK · MOST VIEWED/);
 assert.match(clipsEnglish, /LATEST ON TIKTOK/);
-assert.match(clipsEnglish, /tiktok-embed/);
+assert.match(clipsEnglish, /https:\/\/www\.tiktok\.com\/embed\/@abuadamz\?lang=en&amp;embedFrom=oembed/);
+assert.match(clipsEnglish, /__tt_embed__abuadamz/);
 assert.match(clipsEnglish, /https:\/\/kick\.com\/abu_adamz\/clips/);
-assert.match(clipsEnglish, /https:\/\/www\.tiktok\.com\/@abuadamz/);
+assert.doesNotMatch(clipsEnglish, /blockquote|embed\.js/);
 
 const compiledSections = fs.readFileSync(findFile(/^sections\.[a-f0-9]{12}\.js$/), 'utf8');
 assert.doesNotMatch(compiledSections, /UpcomingStream|NIGHT PATROLS|باترولات الليل/);

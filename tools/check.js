@@ -51,6 +51,8 @@ if (files.includes('_headers')) {
   const headers = fs.readFileSync(path.join(DIST, '_headers'), 'utf8');
   if (headers.includes('unsafe-eval')) errors.push('CSP still allows unsafe-eval');
   if (headers.includes('unpkg.com')) errors.push('CSP still allows the retired unpkg runtime');
+  if (/script-src[^;]*tiktok\.com/.test(headers)) errors.push('TikTok should be frame-only in CSP');
+  if (!/frame-src[^;]*https:\/\/www\.tiktok\.com/.test(headers)) errors.push('TikTok frame permission is missing');
   if (headers.includes('__JSON_LD_HASH__')) errors.push('CSP hash placeholder remains');
   if (files.includes('index.html')) {
     const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
